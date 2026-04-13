@@ -10,10 +10,16 @@ const BUILT_IN_BOL_MAP = {
   'Dha': 'धा', 'Dhi': 'धी', 'Dhin': 'धिं', 'Dhet': 'धेत', 'Dhit': 'धित', 'Dhe': 'धे', 'Dhu': 'धु',
 
   'Krata': 'क्रता', 'krata': 'क्रता', 'Gina': 'गीना', 'gina': 'गीना', 'Nata': 'नाता', 'Nadha': 'नाधा', 'NaDha': 'नाधा', 'Dhagena': 'धागेना', 'dhagena': 'धागेना', 'takena': 'ताकेना', 'Kra': 'क्र', 'Digan': 'दिगन', 'Digana': 'दिगन',
+  'DHAGHEDNAG': 'धाघेड़नग', 'DHINGHEDNAG': 'धिंघेड़नग', 'DHASTAK': 'धाऽतक', 'DHADHATAK': 'धाधातक', 'DHADHADHA': 'धाधाधा', 'TAKTAKTAK': 'तकतकतक',
+  'TINTINTIN': 'तिंतिंतिं', 'DHIGIDHIGIDHIGI': 'धिगिधिगिधिगि', 'NAGENAGENAGE': 'नागेनागेनागे', 'TADHADHA': 'ताधाधा', 'DINDINDINA': 'दिंदिंदिना', 'KITADHAGHED': 'किटधाघेड़',
+  'NAGTAKDHIN': 'नगतकधिं', 'DHAGETRAKDHIN': 'धागेत्रकधिं', 'GHEDNAGDIN': 'घेड़नगदिन', 'DINAKITATA': 'दिनाकिटता', 'DHADHADIN': 'धाधादिं', 'DINDINAKITA': 'दिंदिनाकिट',
+  'TAKDHINDHAGE': 'तकधिंधागे', 'TRAKDHINGHED': 'त्रकधिंगेड़', 'NAGDINDINA': 'नगदिंदिना', 'KITATADHA': 'किटताधा', 'DHADINDIN': 'धादिंदिं', 'DINAKITADHA': 'दिनाकिटधा',
+  'GHEDNAGTAK': 'घेड़नगतक', 'DHINDHAGETRAK': 'धिंधागेत्रक', 'TINTINAKITA': 'तिंतीनाकिट',
   'S': 'ऽ', '-': '–'
 };
 
 const CUSTOM_BOL_MAP_STORAGE_KEY = 'bhatkhande_io_custom_bol_map';
+const BOL_DICTIONARY_API_PATH = '/api/bol-dictionary';
 let BOL_MAP = {};
 let BOL_MAP_REVERSE = {};
 let BOL_KEYS_SORTED = [];
@@ -23,6 +29,20 @@ function _isDevanagariText(text) {
   return /[\u0900-\u097F]/.test(String(text || ''));
 }
 
+function _sanitizeBolMap(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return {};
+
+  const cleaned = {};
+  Object.entries(data).forEach(([roman, devanagari]) => {
+    const cleanRoman = String(roman || '').trim();
+    const cleanDevanagari = String(devanagari || '').trim();
+    if (cleanRoman && cleanDevanagari) {
+      cleaned[cleanRoman] = cleanDevanagari;
+    }
+  });
+  return cleaned;
+}
+
 function _loadCustomBolMap() {
   if (typeof localStorage === 'undefined') return {};
 
@@ -30,22 +50,30 @@ function _loadCustomBolMap() {
     const raw = localStorage.getItem(CUSTOM_BOL_MAP_STORAGE_KEY);
     if (!raw) return {};
 
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-
-    const cleaned = {};
-    Object.entries(parsed).forEach(([roman, devanagari]) => {
-      const cleanRoman = String(roman || '').trim();
-      const cleanDevanagari = String(devanagari || '').trim();
-      if (cleanRoman && cleanDevanagari) {
-        cleaned[cleanRoman] = cleanDevanagari;
-      }
-    });
-    return cleaned;
+    return _sanitizeBolMap(JSON.parse(raw));
   } catch (err) {
     console.warn('Could not load custom bol dictionary:', err);
     return {};
   }
+}
+
+function _saveCustomBolMapToLocalStorage(customMap) {
+  if (typeof localStorage === 'undefined') return;
+
+  try {
+    localStorage.setItem(CUSTOM_BOL_MAP_STORAGE_KEY, JSON.stringify(_sanitizeBolMap(customMap)));
+  } catch (err) {
+    console.warn('Could not persist custom bol dictionary:', err);
+  }
+}
+
+function _areBolMapsEqual(left, right) {
+  const leftMap = _sanitizeBolMap(left);
+  const rightMap = _sanitizeBolMap(right);
+  const leftKeys = Object.keys(leftMap);
+  const rightKeys = Object.keys(rightMap);
+  if (leftKeys.length !== rightKeys.length) return false;
+  return leftKeys.every(key => rightMap[key] === leftMap[key]);
 }
 
 function _refreshBolDictionaryIndexes() {
@@ -73,16 +101,57 @@ function saveCustomBolMapping(romanBol, devanagariBol) {
   const customMap = _loadCustomBolMap();
   customMap[cleanRoman] = cleanDevanagari;
 
-  if (typeof localStorage !== 'undefined') {
-    try {
-      localStorage.setItem(CUSTOM_BOL_MAP_STORAGE_KEY, JSON.stringify(customMap));
-    } catch (err) {
-      console.warn('Could not persist custom bol dictionary:', err);
-    }
-  }
-
+  _saveCustomBolMapToLocalStorage(customMap);
   _rebuildBolDictionary();
+  void pushBolDictionaryToServer(customMap);
   return cleanRoman;
+}
+
+async function pushBolDictionaryToServer(customMap = _loadCustomBolMap()) {
+  if (typeof fetch !== 'function') return false;
+
+  try {
+    const response = await fetch(BOL_DICTIONARY_API_PATH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(_sanitizeBolMap(customMap)),
+      signal: AbortSignal.timeout(2000)
+    });
+    return response.ok;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function syncBolDictionaryWithServer() {
+  if (typeof fetch !== 'function') return false;
+
+  const localMap = _loadCustomBolMap();
+
+  try {
+    const response = await fetch(BOL_DICTIONARY_API_PATH, { signal: AbortSignal.timeout(2000) });
+    if (!response.ok) return false;
+
+    const serverMap = _sanitizeBolMap(await response.json());
+    const mergedMap = {
+      ...serverMap,
+      ...localMap
+    };
+
+    if (!_areBolMapsEqual(localMap, mergedMap)) {
+      _saveCustomBolMapToLocalStorage(mergedMap);
+    }
+
+    _rebuildBolDictionary();
+
+    if (!_areBolMapsEqual(serverMap, mergedMap)) {
+      await pushBolDictionaryToServer(mergedMap);
+    }
+
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 function parseCustomBolMappingToken(token) {
