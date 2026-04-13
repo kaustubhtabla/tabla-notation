@@ -2,6 +2,8 @@
 
 A browser-based tabla notation writer for composing, editing, saving, and exporting Indian classical tabla compositions in Bhatkhande notation.
 
+Public site: `https://kaustubhtabla.github.io/tabla-notation/`
+
 ## Features
 
 - Create and edit tabla compositions in the browser
@@ -22,6 +24,14 @@ python3 server.py
 3. Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 The app serves the frontend and stores saved compositions in `data/compositions.json`.
+
+## Hosted version
+
+The public GitHub Pages version runs entirely in the browser.
+
+- It is accessible from anywhere through the public site URL
+- Saved compositions on the hosted version stay in that browser's local storage
+- Shared cloud sync still requires running the Python server yourself
 
 ## Project structure
 
