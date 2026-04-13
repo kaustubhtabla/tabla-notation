@@ -3,7 +3,8 @@ import os
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 DATA_DIR = "data"
-DB_FILE = os.path.join(DATA_DIR, "compositions.json")
+REPO_DB_FILE = os.path.join(DATA_DIR, "compositions.json")
+DB_FILE = os.environ.get("BHATKHANDE_DB_FILE", os.path.join(DATA_DIR, "compositions.local.json"))
 LEGACY_BUILT_IN_TITLE = "Built-in Dilli Kayda"
 LEGACY_BUILT_IN_NOTE = "Starter Dilli kayda loaded as a built-in example composition."
 STALE_PARTIAL_IMPORT_IDS = {
@@ -109,6 +110,38 @@ def sanitize_saved_list(data):
         and not is_stale_partial_doc_import(item)
     ]
 
+def ensure_data_dir():
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+def bootstrap_db_file():
+    ensure_data_dir()
+    if os.path.exists(DB_FILE):
+        return
+
+    seed_data = []
+    if DB_FILE != REPO_DB_FILE and os.path.exists(REPO_DB_FILE):
+        try:
+            with open(REPO_DB_FILE, 'r', encoding='utf-8') as f:
+                seed_data = sanitize_saved_list(json.load(f))
+            if seed_data:
+                print(f"Migrated existing compositions from {REPO_DB_FILE} to {DB_FILE}.")
+        except Exception as err:
+            print(f"Could not migrate seed data from {REPO_DB_FILE}: {err}")
+            seed_data = []
+
+    with open(DB_FILE, 'w', encoding='utf-8') as f:
+        json.dump(seed_data, f, ensure_ascii=False)
+
+def load_saved_list():
+    bootstrap_db_file()
+    with open(DB_FILE, 'r', encoding='utf-8') as f:
+        return sanitize_saved_list(json.load(f))
+
+def write_saved_list(data):
+    bootstrap_db_file()
+    with open(DB_FILE, 'w', encoding='utf-8') as f:
+        json.dump(sanitize_saved_list(data), f, ensure_ascii=False)
+
 class SyncHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -128,15 +161,10 @@ class SyncHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            
-            if not os.path.exists(DB_FILE):
-                self.wfile.write(b'[]')
-            else:
-                with open(DB_FILE, 'r', encoding='utf-8') as f:
-                    data = sanitize_saved_list(json.load(f))
-                with open(DB_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, ensure_ascii=False)
-                self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
+            data = load_saved_list()
+            write_saved_list(data)
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
         else:
             super().do_GET()
 
@@ -144,18 +172,12 @@ class SyncHandler(SimpleHTTPRequestHandler):
         if self.path == '/api/compositions':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
-            
-            # Ensure data dir exists
-            if not os.path.exists(DATA_DIR):
-                os.makedirs(DATA_DIR)
-                
+
             # Parse to ensure valid JSON
             try:
                 data = json.loads(post_data.decode('utf-8'))
-                data = sanitize_saved_list(data)
-                with open(DB_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, ensure_ascii=False)
-                
+                write_saved_list(data)
+
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -172,7 +194,8 @@ class SyncHandler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     port = 8080
+    bootstrap_db_file()
     server_address = ('', port)
     httpd = HTTPServer(server_address, SyncHandler)
-    print(f"bhatkhande.io Sync Server running on port {port}...")
+    print(f"bhatkhande.io Sync Server running on port {port} using {DB_FILE}...")
     httpd.serve_forever()
