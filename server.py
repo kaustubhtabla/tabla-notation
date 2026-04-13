@@ -5,6 +5,8 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 DATA_DIR = "data"
 REPO_DB_FILE = os.path.join(DATA_DIR, "compositions.json")
 DB_FILE = os.environ.get("BHATKHANDE_DB_FILE", os.path.join(DATA_DIR, "compositions.local.json"))
+REPO_BOL_DICT_FILE = os.path.join(DATA_DIR, "bol-dictionary.json")
+BOL_DICT_FILE = os.environ.get("BHATKHANDE_BOL_DICT_FILE", os.path.join(DATA_DIR, "bol-dictionary.local.json"))
 LEGACY_BUILT_IN_TITLE = "Built-in Dilli Kayda"
 LEGACY_BUILT_IN_NOTE = "Starter Dilli kayda loaded as a built-in example composition."
 STALE_PARTIAL_IMPORT_IDS = {
@@ -110,6 +112,18 @@ def sanitize_saved_list(data):
         and not is_stale_partial_doc_import(item)
     ]
 
+def sanitize_bol_map(data):
+    if not isinstance(data, dict):
+        return {}
+
+    cleaned = {}
+    for roman, devanagari in data.items():
+        clean_roman = str(roman or "").strip()
+        clean_devanagari = str(devanagari or "").strip()
+        if clean_roman and clean_devanagari:
+            cleaned[clean_roman] = clean_devanagari
+    return cleaned
+
 def ensure_data_dir():
     os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -132,6 +146,25 @@ def bootstrap_db_file():
     with open(DB_FILE, 'w', encoding='utf-8') as f:
         json.dump(seed_data, f, ensure_ascii=False)
 
+def bootstrap_bol_dict_file():
+    ensure_data_dir()
+    if os.path.exists(BOL_DICT_FILE):
+        return
+
+    seed_data = {}
+    if BOL_DICT_FILE != REPO_BOL_DICT_FILE and os.path.exists(REPO_BOL_DICT_FILE):
+        try:
+            with open(REPO_BOL_DICT_FILE, 'r', encoding='utf-8') as f:
+                seed_data = sanitize_bol_map(json.load(f))
+            if seed_data:
+                print(f"Migrated existing bol dictionary from {REPO_BOL_DICT_FILE} to {BOL_DICT_FILE}.")
+        except Exception as err:
+            print(f"Could not migrate bol dictionary from {REPO_BOL_DICT_FILE}: {err}")
+            seed_data = {}
+
+    with open(BOL_DICT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(seed_data, f, ensure_ascii=False)
+
 def load_saved_list():
     bootstrap_db_file()
     with open(DB_FILE, 'r', encoding='utf-8') as f:
@@ -141,6 +174,16 @@ def write_saved_list(data):
     bootstrap_db_file()
     with open(DB_FILE, 'w', encoding='utf-8') as f:
         json.dump(sanitize_saved_list(data), f, ensure_ascii=False)
+
+def load_bol_map():
+    bootstrap_bol_dict_file()
+    with open(BOL_DICT_FILE, 'r', encoding='utf-8') as f:
+        return sanitize_bol_map(json.load(f))
+
+def write_bol_map(data):
+    bootstrap_bol_dict_file()
+    with open(BOL_DICT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(sanitize_bol_map(data), f, ensure_ascii=False)
 
 class SyncHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -165,6 +208,14 @@ class SyncHandler(SimpleHTTPRequestHandler):
             data = load_saved_list()
             write_saved_list(data)
             self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/bol-dictionary':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+
+            data = load_bol_map()
+            write_bol_map(data)
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
         else:
             super().do_GET()
 
@@ -188,6 +239,24 @@ class SyncHandler(SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+        elif self.path == '/api/bol-dictionary':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                write_bol_map(data)
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+            except Exception as e:
+                print("Error saving bol dictionary:", e)
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
@@ -195,7 +264,8 @@ class SyncHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     port = 8080
     bootstrap_db_file()
+    bootstrap_bol_dict_file()
     server_address = ('', port)
     httpd = HTTPServer(server_address, SyncHandler)
-    print(f"bhatkhande.io Sync Server running on port {port} using {DB_FILE}...")
+    print(f"bhatkhande.io Sync Server running on port {port} using {DB_FILE} and {BOL_DICT_FILE}...")
     httpd.serve_forever()

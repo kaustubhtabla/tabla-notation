@@ -17,6 +17,7 @@ const bhatkhande = {
   async init() {
     try {
       this._migrateLegacyData();
+      await syncBolDictionaryWithServer();
       this.bolInput = new BolInput();
 
       const lastActiveId = localStorage.getItem('bhatkhande_io_last_active_id');
