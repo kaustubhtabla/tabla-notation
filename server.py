@@ -7,6 +7,7 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 DATA_DIR = "data"
 REPO_DB_FILE = os.path.join(DATA_DIR, "compositions.json")
+LIBRARY_FILE = os.path.join(DATA_DIR, "library.json")
 DB_FILE = os.environ.get("BHATKHANDE_DB_FILE", os.path.join(DATA_DIR, "compositions.local.json"))
 REPO_BOL_DICT_FILE = os.path.join(DATA_DIR, "bol-dictionary.json")
 BOL_DICT_FILE = os.environ.get("BHATKHANDE_BOL_DICT_FILE", os.path.join(DATA_DIR, "bol-dictionary.local.json"))
@@ -291,6 +292,16 @@ class SyncHandler(SimpleHTTPRequestHandler):
             data = load_bol_map()
             write_bol_map(data)
             self.send_json(200, data)
+        elif self.path == '/api/library':
+            try:
+                with open(LIBRARY_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                self.send_json(200, data if isinstance(data, list) else [])
+            except FileNotFoundError:
+                self.send_json(200, [])
+            except Exception as e:
+                print("Error loading library:", e)
+                self.send_json(500, [])
         else:
             super().do_GET()
 

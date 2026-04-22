@@ -48,6 +48,7 @@ const bhatkhande = {
 
       this._initTheme();
       this._initDashboard();
+      this._initLibrary();
       this._populateDropdowns();
       this._setupLayakariGenerator();
 
@@ -208,6 +209,7 @@ const bhatkhande = {
   _openDashboard() {
     document.getElementById('dashboard-hub')?.classList.add('active');
     this._populateDashboardRecent();
+    this._populateLibraryPanel();
   }
 
   _buildCompositionTypeOptions(selectedType) {
@@ -845,6 +847,136 @@ const bhatkhande = {
       const bTime = Date.parse(b?.updatedAt || '') || 0;
       return bTime - aTime;
     });
+  }
+
+  // ── Composition Library ──────────────────────────────────────────────
+
+  _initLibrary() {
+    this._libraryCache = null;
+
+    const filterSelect = document.getElementById('dash-library-filter');
+    if (filterSelect) {
+      filterSelect.addEventListener('change', () => {
+        this._renderLibraryCards(filterSelect.value);
+      });
+    }
+
+    this._populateLibraryPanel();
+  }
+
+  async _fetchLibrary() {
+    if (this._libraryCache) return this._libraryCache;
+
+    try {
+      const response = await fetch('/api/library', { signal: AbortSignal.timeout(2000) });
+      if (response.ok) {
+        this._libraryCache = await response.json();
+        return this._libraryCache;
+      }
+    } catch (_) { /* fall through */ }
+
+    // Static fallback (e.g., GitHub Pages)
+    try {
+      const response = await fetch('data/library.json', { signal: AbortSignal.timeout(2000) });
+      if (response.ok) {
+        this._libraryCache = await response.json();
+        return this._libraryCache;
+      }
+    } catch (_) { /* fall through */ }
+
+    return [];
+  }
+
+  async _populateLibraryPanel() {
+    const library = await this._fetchLibrary();
+    if (!Array.isArray(library) || library.length === 0) {
+      const gridEl = document.getElementById('dash-library-grid');
+      if (gridEl) gridEl.innerHTML = '<div class="dash-empty">No library compositions available.</div>';
+      return;
+    }
+
+    // Populate the taal filter dropdown
+    const filterSelect = document.getElementById('dash-library-filter');
+    if (filterSelect) {
+      const taalIds = [...new Set(library.map(c => c.taalId))];
+      const currentVal = filterSelect.value;
+      filterSelect.innerHTML = '<option value="all">All Taals</option>' +
+        taalIds.map(id => {
+          const taal = TAAL_DATABASE[id];
+          const name = taal ? `${taal.name} (${taal.matras} matras)` : id;
+          return `<option value="${id}">${name}</option>`;
+        }).join('');
+      if (currentVal && [...filterSelect.options].some(o => o.value === currentVal)) {
+        filterSelect.value = currentVal;
+      }
+    }
+
+    this._renderLibraryCards(filterSelect?.value || 'all');
+  }
+
+  _renderLibraryCards(filterTaalId = 'all') {
+    const gridEl = document.getElementById('dash-library-grid');
+    if (!gridEl || !this._libraryCache) return;
+
+    const library = filterTaalId === 'all'
+      ? this._libraryCache
+      : this._libraryCache.filter(c => c.taalId === filterTaalId);
+
+    if (library.length === 0) {
+      gridEl.innerHTML = '<div class="dash-empty">No compositions match this filter.</div>';
+      return;
+    }
+
+    gridEl.innerHTML = library.map(c => {
+      const taal = TAAL_DATABASE[c.taalId];
+      const taalName = taal ? taal.name : c.taalId;
+      const typeInfo = typeof getCompositionTypeInfo === 'function' ? getCompositionTypeInfo(c.compositionType) : null;
+      const typeName = typeInfo ? typeInfo.name : c.compositionType;
+      const sectionCount = Array.isArray(c.sections) ? c.sections.length : 0;
+      return `
+        <div class="dash-library-card" data-lib-id="${this._escapeHtml(c.id)}">
+          <span class="dash-library-badge">Library</span>
+          <div class="dash-card-title">${this._escapeHtml(c.title || 'Untitled')}</div>
+          <div class="dash-card-taal">${this._escapeHtml(taalName)}</div>
+          <div class="dash-card-meta">
+            <span class="dash-card-type">${this._escapeHtml(typeName)}</span>
+            <span class="dash-card-meta-dot"></span>
+            <span class="dash-card-sections">${sectionCount} section${sectionCount !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    gridEl.querySelectorAll('.dash-library-card').forEach(card => {
+      card.addEventListener('click', () => {
+        this.cloneFromLibrary(card.getAttribute('data-lib-id'));
+      });
+    });
+  }
+
+  async cloneFromLibrary(libraryId) {
+    const library = await this._fetchLibrary();
+    const entry = library.find(c => c.id === libraryId);
+    if (!entry) {
+      this._showToast('Library composition not found.', 'error');
+      return;
+    }
+
+    // Deep clone and assign fresh identity
+    const cloneData = JSON.parse(JSON.stringify(entry));
+    cloneData.id = 'comp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+    cloneData.createdAt = new Date().toISOString();
+    cloneData.updatedAt = new Date().toISOString();
+
+    const comp = Composition.fromJSON(cloneData);
+    this.composition = comp;
+    await this.composition.save(true);
+    this.notationGrid.composition = this.composition;
+    this.notationGrid.setScript(this.currentScript);
+    this._updateMetadataPanel();
+    this._updateSavedList();
+    document.getElementById('dashboard-hub')?.classList.remove('active');
+    this._showToast(`"${entry.title}" loaded from library`, 'success');
   }
   }
 };

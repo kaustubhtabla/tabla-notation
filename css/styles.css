@@ -1552,11 +1552,12 @@ body::before {
 .dash-container {
   width: 90%;
   max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 24px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
   position: relative;
   transform: translateY(20px);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1759,4 +1760,118 @@ body::before {
   font-size: 0.9rem;
   font-style: italic;
   padding: 20px 0;
+}
+
+/* ─── Composition Library Section ──────────────────────────────────── */
+.dash-library-section {
+  padding: 0 40px 32px;
+}
+
+.dash-library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dash-library-header .dash-panel-title {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.dash-library-filter {
+  max-width: 200px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.dash-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.dash-library-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.dash-library-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--goldPrimary);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dash-library-card .dash-card-title {
+  padding-right: 50px;
+}
+
+.dash-library-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(232, 168, 56, 0.12);
+  color: var(--goldPrimary);
+  border: 1px solid rgba(232, 168, 56, 0.2);
+}
+
+.dash-library-card .dash-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.dash-library-card .dash-card-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.dash-library-card .dash-card-sections {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.dash-card-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .dash-library-section {
+    padding: 0 20px 24px;
+  }
+
+  .dash-library-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dash-library-filter {
+    max-width: 100%;
+    width: 100%;
+  }
 }
