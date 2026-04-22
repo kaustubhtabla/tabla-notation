@@ -867,20 +867,30 @@ const bhatkhande = {
   async _fetchLibrary() {
     if (this._libraryCache) return this._libraryCache;
 
+    // Try API endpoint first (local sync server)
     try {
       const response = await fetch('/api/library', { signal: AbortSignal.timeout(2000) });
       if (response.ok) {
-        this._libraryCache = await response.json();
-        return this._libraryCache;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            this._libraryCache = data;
+            return this._libraryCache;
+          }
+        }
       }
-    } catch (_) { /* fall through */ }
+    } catch (_) { /* fall through to static fallback */ }
 
-    // Static fallback (e.g., GitHub Pages)
+    // Static JSON fallback (GitHub Pages, file://, or server unavailable)
     try {
-      const response = await fetch('data/library.json', { signal: AbortSignal.timeout(2000) });
+      const response = await fetch('data/library.json', { signal: AbortSignal.timeout(3000) });
       if (response.ok) {
-        this._libraryCache = await response.json();
-        return this._libraryCache;
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          this._libraryCache = data;
+          return this._libraryCache;
+        }
       }
     } catch (_) { /* fall through */ }
 
