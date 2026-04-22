@@ -70,10 +70,18 @@ if ! git merge-base --is-ancestor "origin/$target_branch" "$source_branch"; then
 fi
 
 echo "Pushing $source_branch to origin/$source_branch..."
-git push "${push_args[@]}" origin "$source_branch"
+if [[ "${#push_args[@]}" -gt 0 ]]; then
+  git push "${push_args[@]}" origin "$source_branch"
+else
+  git push origin "$source_branch"
+fi
 
 echo "Publishing $source_branch to origin/$target_branch..."
-git push "${push_args[@]}" origin "$source_branch:$target_branch"
+if [[ "${#push_args[@]}" -gt 0 ]]; then
+  git push "${push_args[@]}" origin "$source_branch:$target_branch"
+else
+  git push origin "$source_branch:$target_branch"
+fi
 
 if [[ "$dry_run" -eq 1 ]]; then
   echo "Dry run complete. No changes were pushed."
