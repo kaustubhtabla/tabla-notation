@@ -774,7 +774,14 @@ class PdfExport {
       return 'मुख';
     }
 
-    const normalizedLabel = PdfExport._normalizePdfSectionLabel(rawLabel, script);
+    // Strip "Main" prefix from labels like "Main (Dugun)" → "Dugun"
+    let cleanedLabel = rawLabel;
+    const mainWrappedMatch = rawLabel.match(/^Main\s*\((.+)\)\s*$/i);
+    if (mainWrappedMatch) {
+      cleanedLabel = mainWrappedMatch[1].trim();
+    }
+
+    const normalizedLabel = PdfExport._normalizePdfSectionLabel(cleanedLabel, script);
     return PdfExport._localizeText(normalizedLabel, script, normalizedLabel);
   }
 
