@@ -12,11 +12,13 @@ const bhatkhande = {
     this.currentScript = 'roman';
     this.autoSaveTimer = null;
     this.isOnline = false;
+    this.showOptionalDetails = false;
   }
 
   async init() {
     try {
       this._migrateLegacyData();
+      this.showOptionalDetails = this._loadOptionalDetailsPreference();
       await syncBolDictionaryWithServer();
       this.bolInput = new BolInput();
 
@@ -53,6 +55,7 @@ const bhatkhande = {
       this._updateMetadataPanel();
       this._updateSavedList();
       this._bindUIEvents();
+      this._applyOptionalDetailsVisibility();
 
       this._startAutoSave();
     } catch (err) {
@@ -78,6 +81,79 @@ const bhatkhande = {
     }
 
     keysToRemove.forEach(k => localStorage.removeItem(k));
+  }
+
+  _loadOptionalDetailsPreference() {
+    try {
+      const stored = localStorage.getItem('bhatkhande_io_show_optional_details');
+      const legacyStored = localStorage.getItem('bhatkhande_io_show_composition_details');
+      const resolved = stored === null ? legacyStored : stored;
+      if (resolved === null) return false;
+      return resolved === 'true';
+    } catch (err) {
+      console.warn('Could not read optional details preference:', err);
+      return false;
+    }
+  }
+
+  _applyOptionalDetailsVisibility() {
+    const section = document.getElementById('optional-details-section');
+    const body = document.getElementById('optional-details-body');
+    const toggle = document.getElementById('toggle-optional-details');
+    const label = document.getElementById('optional-details-toggle-label');
+
+    if (section) {
+      section.classList.toggle('is-collapsed', !this.showOptionalDetails);
+    }
+    if (body) {
+      body.hidden = !this.showOptionalDetails;
+    }
+    if (toggle) {
+      toggle.checked = this.showOptionalDetails;
+    }
+    if (label) {
+      label.textContent = this.showOptionalDetails ? 'On' : 'Off';
+    }
+  }
+
+  _setOptionalDetailsVisibility(isVisible) {
+    this.showOptionalDetails = !!isVisible;
+    this._applyOptionalDetailsVisibility();
+    try {
+      localStorage.setItem('bhatkhande_io_show_optional_details', this.showOptionalDetails ? 'true' : 'false');
+    } catch (err) {
+      console.warn('Could not save optional details preference:', err);
+    }
+  }
+
+  _bindOptionalMetadataInputs() {
+    const layaSelect = document.getElementById('comp-laya');
+    if (layaSelect) {
+      layaSelect.addEventListener('change', (e) => {
+        this.composition.updateMetadata({ laya: e.target.value });
+      });
+    }
+
+    const gharanaInput = document.getElementById('comp-gharana');
+    if (gharanaInput) {
+      gharanaInput.addEventListener('input', (e) => {
+        this.composition.updateMetadata({ gharana: e.target.value });
+      });
+    }
+
+    const guruInput = document.getElementById('comp-guru');
+    if (guruInput) {
+      guruInput.addEventListener('input', (e) => {
+        this.composition.updateMetadata({ guru: e.target.value });
+      });
+    }
+
+    const notesInput = document.getElementById('comp-notes');
+    if (notesInput) {
+      notesInput.addEventListener('input', (e) => {
+        this.composition.updateMetadata({ notes: e.target.value });
+      });
+    }
   }
 
   _populateDropdowns() {
@@ -405,43 +481,24 @@ const bhatkhande = {
       });
     }
 
-    const layaSelect = document.getElementById('comp-laya');
-    if (layaSelect) {
-      layaSelect.addEventListener('change', (e) => {
-        this.composition.updateMetadata({ laya: e.target.value });
-      });
-    }
+    this._bindOptionalMetadataInputs();
 
-    const gharanaInput = document.getElementById('comp-gharana');
-    if (gharanaInput) {
-      gharanaInput.addEventListener('input', (e) => {
-        this.composition.updateMetadata({ gharana: e.target.value });
-      });
-    }
-
-    const guruInput = document.getElementById('comp-guru');
-    if (guruInput) {
-      guruInput.addEventListener('input', (e) => {
-        this.composition.updateMetadata({ guru: e.target.value });
-      });
-    }
-
-    const notesInput = document.getElementById('comp-notes');
-    if (notesInput) {
-      notesInput.addEventListener('input', (e) => {
-        this.composition.updateMetadata({ notes: e.target.value });
+    const detailsToggle = document.getElementById('toggle-optional-details');
+    if (detailsToggle) {
+      detailsToggle.addEventListener('change', (e) => {
+        this._setOptionalDetailsVisibility(e.target.checked);
       });
     }
 
     const scriptToggle = document.getElementById('script-toggle');
     if (scriptToggle) {
       scriptToggle.addEventListener('change', (e) => {
-        this.currentScript = e.target.checked ? 'devanagari' : 'roman';
-        this.notationGrid.setScript(this.currentScript);
-        const label = document.getElementById('script-label');
-        if (label) label.textContent = this.currentScript === 'devanagari' ? 'देवनागरी' : 'Roman';
-      });
-    }
+	        this.currentScript = e.target.checked ? 'devanagari' : 'roman';
+	        this.notationGrid.setScript(this.currentScript);
+	        const label = document.getElementById('script-label');
+	        if (label) label.textContent = this.currentScript === 'devanagari' ? 'Hindi' : 'English';
+	      });
+	    }
 
     document.getElementById('btn-home')?.addEventListener('click', () => {
       this._openDashboard();
@@ -456,8 +513,6 @@ const bhatkhande = {
     document.getElementById('btn-import-json')?.addEventListener('click', () => this.importJSON());
     document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
     document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
-    
-
 
     const quickEntryBtn = document.getElementById('btn-quick-entry-apply');
     if (quickEntryBtn) {
@@ -549,7 +604,9 @@ const bhatkhande = {
   }
 
   exportPDF() {
-    PdfExport.exportAsPDF(this.composition, this.currentScript);
+    PdfExport.exportAsPDF(this.composition, this.currentScript, {
+      includeOptionalDetails: this.showOptionalDetails
+    });
     this._showToast('PDF preview opened', 'success');
   }
 

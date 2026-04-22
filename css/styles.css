@@ -538,6 +538,24 @@ body::before {
   border-bottom: 1px solid var(--grid-border);
 }
 
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.details-toggle-group {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--grid-border);
+}
+
+.details-toggle-group.is-collapsed .sidebar-section-header {
+  margin-bottom: 0;
+}
+
 .sidebar-section-title {
   font-size: 0.68rem;
   font-weight: 700;
@@ -545,6 +563,28 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   margin-bottom: 12px;
+}
+
+.sidebar-section-header .sidebar-section-title {
+  margin-bottom: 0;
+}
+
+.sidebar-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-section-toggle-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.sidebar-section-body[hidden] {
+  display: none !important;
 }
 
 /* ─── Form Elements ────────────────────────────────────────────────── */

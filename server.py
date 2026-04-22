@@ -1,5 +1,8 @@
 import json
 import os
+import smtplib
+import ssl
+from email.message import EmailMessage
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 DATA_DIR = "data"
@@ -11,6 +14,18 @@ LEGACY_BUILT_IN_TITLE = "Built-in Dilli Kayda"
 LEGACY_BUILT_IN_NOTE = "Starter Dilli kayda loaded as a built-in example composition."
 STALE_PARTIAL_IMPORT_IDS = {
     "comp_mnhgdlg6_9hvxrt"
+}
+CONTACT_TO_EMAIL = os.environ.get("BHATKHANDE_CONTACT_TO_EMAIL", "kaustnbh@gmail.com")
+CONTACT_FROM_EMAIL = os.environ.get(
+    "BHATKHANDE_CONTACT_FROM_EMAIL",
+    os.environ.get("BHATKHANDE_CONTACT_SMTP_USERNAME", CONTACT_TO_EMAIL)
+)
+CONTACT_SMTP_HOST = os.environ.get("BHATKHANDE_CONTACT_SMTP_HOST", "smtp.gmail.com")
+CONTACT_SMTP_PORT = int(os.environ.get("BHATKHANDE_CONTACT_SMTP_PORT", "587"))
+CONTACT_SMTP_USERNAME = os.environ.get("BHATKHANDE_CONTACT_SMTP_USERNAME", "")
+CONTACT_SMTP_PASSWORD = os.environ.get("BHATKHANDE_CONTACT_SMTP_PASSWORD", "")
+CONTACT_SMTP_TLS = os.environ.get("BHATKHANDE_CONTACT_SMTP_TLS", "true").strip().lower() not in {
+    "0", "false", "no", "off"
 }
 
 def is_legacy_built_in(item):
@@ -185,7 +200,75 @@ def write_bol_map(data):
     with open(BOL_DICT_FILE, 'w', encoding='utf-8') as f:
         json.dump(sanitize_bol_map(data), f, ensure_ascii=False)
 
+def parse_contact_payload(data):
+    if not isinstance(data, dict):
+        raise ValueError("Invalid contact payload.")
+
+    first_name = str(data.get("firstName", "")).strip()
+    last_name = str(data.get("lastName", "")).strip()
+    sender_email = str(data.get("email", "")).strip()
+    subject = str(data.get("subject", "")).strip() or "Bhatkhande.io inquiry"
+    message = str(data.get("message", "")).strip()
+
+    if not sender_email:
+        raise ValueError("Email is required.")
+
+    if not message:
+        raise ValueError("Message is required.")
+
+    return {
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": sender_email,
+        "subject": subject,
+        "message": message,
+    }
+
+def send_contact_email(payload):
+    if not CONTACT_TO_EMAIL:
+        raise RuntimeError("Contact destination is not configured.")
+
+    message = EmailMessage()
+    sender_name = " ".join(part for part in [payload["first_name"], payload["last_name"]] if part).strip()
+    body_lines = [
+        f"Name: {sender_name}" if sender_name else "Name: Not provided",
+        f"Email: {payload['email']}",
+        "",
+        payload["message"],
+    ]
+
+    message["Subject"] = payload["subject"]
+    message["From"] = CONTACT_FROM_EMAIL
+    message["To"] = CONTACT_TO_EMAIL
+    message["Reply-To"] = payload["email"]
+    message.set_content("\n".join(body_lines))
+
+    if CONTACT_SMTP_USERNAME and not CONTACT_SMTP_PASSWORD:
+        raise RuntimeError("SMTP password is missing.")
+
+    if CONTACT_SMTP_PORT == 465:
+        with smtplib.SMTP_SSL(CONTACT_SMTP_HOST, CONTACT_SMTP_PORT, timeout=20) as smtp:
+            if CONTACT_SMTP_USERNAME and CONTACT_SMTP_PASSWORD:
+                smtp.login(CONTACT_SMTP_USERNAME, CONTACT_SMTP_PASSWORD)
+            smtp.send_message(message)
+        return
+
+    with smtplib.SMTP(CONTACT_SMTP_HOST, CONTACT_SMTP_PORT, timeout=20) as smtp:
+        smtp.ehlo()
+        if CONTACT_SMTP_TLS:
+            smtp.starttls(context=ssl.create_default_context())
+            smtp.ehlo()
+        if CONTACT_SMTP_USERNAME and CONTACT_SMTP_PASSWORD:
+            smtp.login(CONTACT_SMTP_USERNAME, CONTACT_SMTP_PASSWORD)
+        smtp.send_message(message)
+
 class SyncHandler(SimpleHTTPRequestHandler):
+    def send_json(self, status_code, payload):
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(payload, ensure_ascii=False).encode('utf-8'))
+
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -201,21 +284,13 @@ class SyncHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/api/compositions':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-
             data = load_saved_list()
             write_saved_list(data)
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            self.send_json(200, data)
         elif self.path == '/api/bol-dictionary':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-
             data = load_bol_map()
             write_bol_map(data)
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            self.send_json(200, data)
         else:
             super().do_GET()
 
@@ -228,17 +303,10 @@ class SyncHandler(SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 write_saved_list(data)
-
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+                self.send_json(200, {"status": "success"})
             except Exception as e:
                 print("Error saving:", e)
-                self.send_response(400)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                self.send_json(400, {"status": "error", "message": str(e)})
         elif self.path == '/api/bol-dictionary':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
@@ -246,17 +314,27 @@ class SyncHandler(SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 write_bol_map(data)
-
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+                self.send_json(200, {"status": "success"})
             except Exception as e:
                 print("Error saving bol dictionary:", e)
-                self.send_response(400)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                self.send_json(400, {"status": "error", "message": str(e)})
+        elif self.path == '/api/contact':
+            content_length = int(self.headers.get('Content-Length', '0'))
+            post_data = self.rfile.read(content_length)
+
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                payload = parse_contact_payload(data)
+                send_contact_email(payload)
+                self.send_json(200, {"status": "success", "message": "Message sent successfully."})
+            except ValueError as e:
+                self.send_json(400, {"status": "error", "message": str(e)})
+            except RuntimeError as e:
+                print("Contact email configuration error:", e)
+                self.send_json(500, {"status": "error", "message": str(e)})
+            except Exception as e:
+                print("Error sending contact email:", e)
+                self.send_json(500, {"status": "error", "message": "Could not send the message."})
         else:
             self.send_response(404)
             self.end_headers()

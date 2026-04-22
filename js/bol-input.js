@@ -21,7 +21,7 @@ class BolInput {
     this.overlay = document.createElement('div');
     this.overlay.className = 'bol-input-overlay';
     this.overlay.innerHTML = `
-      <input type="text" class="bol-input-field" placeholder="Type bol or roman=देवनागरी"
+      <input type="text" class="bol-input-field" placeholder="Type bol or Dha=धा"
              spellcheck="false" autocomplete="off" autocapitalize="off">
       <div class="bol-autocomplete-dropdown"></div>
     `;

@@ -680,6 +680,17 @@ class Composition {
   }
 
   static importFromFile(file) {
+    const fileName = String(file && file.name ? file.name : '').toLowerCase();
+    const mimeType = String(file && file.type ? file.type : '').toLowerCase();
+    const isPdf = fileName.endsWith('.pdf') || mimeType === 'application/pdf';
+
+    if (isPdf) {
+      if (typeof PdfImport === 'undefined' || !PdfImport || typeof PdfImport.importFromFile !== 'function') {
+        return Promise.reject(new Error('PDF import support is unavailable in this build.'));
+      }
+      return PdfImport.importFromFile(file);
+    }
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {

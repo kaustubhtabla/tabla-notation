@@ -9,12 +9,13 @@ const BUILT_IN_BOL_MAP = {
   'Ge': 'गे', 'Ghe': 'घे', 'Ga': 'ग', 'Ka': 'क', 'Ke': 'के', 'Kat': 'कत', 'kat': 'कत', 'Gin': 'गिं', 'Ki': 'कि',
   'Dha': 'धा', 'Dhi': 'धी', 'Dhin': 'धिं', 'Dhet': 'धेत', 'Dhit': 'धित', 'Dhe': 'धे', 'Dhu': 'धु',
 
-  'Krata': 'क्रता', 'krata': 'क्रता', 'Gina': 'गीना', 'gina': 'गीना', 'Nata': 'नाता', 'Nadha': 'नाधा', 'NaDha': 'नाधा', 'Dhagena': 'धागेना', 'dhagena': 'धागेना', 'takena': 'ताकेना', 'Kra': 'क्र', 'Digan': 'दिगन', 'Digana': 'दिगन',
-  'DHAGHEDNAG': 'धाघेड़नग', 'DHINGHEDNAG': 'धिंघेड़नग', 'DHASTAK': 'धाऽतक', 'DHADHATAK': 'धाधातक', 'DHADHADHA': 'धाधाधा', 'TAKTAKTAK': 'तकतकतक',
-  'TINTINTIN': 'तिंतिंतिं', 'DHIGIDHIGIDHIGI': 'धिगिधिगिधिगि', 'NAGENAGENAGE': 'नागेनागेनागे', 'TADHADHA': 'ताधाधा', 'DINDINDINA': 'दिंदिंदिना', 'KITADHAGHED': 'किटधाघेड़',
-  'NAGTAKDHIN': 'नगतकधिं', 'DHAGETRAKDHIN': 'धागेत्रकधिं', 'GHEDNAGDIN': 'घेड़नगदिन', 'DINAKITATA': 'दिनाकिटता', 'DHADHADIN': 'धाधादिं', 'DINDINAKITA': 'दिंदिनाकिट',
-  'TAKDHINDHAGE': 'तकधिंधागे', 'TRAKDHINGHED': 'त्रकधिंगेड़', 'NAGDINDINA': 'नगदिंदिना', 'KITATADHA': 'किटताधा', 'DHADINDIN': 'धादिंदिं', 'DINAKITADHA': 'दिनाकिटधा',
-  'GHEDNAGTAK': 'घेड़नगतक', 'DHINDHAGETRAK': 'धिंधागेत्रक', 'TINTINAKITA': 'तिंतीनाकिट',
+  'Krata': 'क्रता', 'krata': 'क्रता', 'Gina': 'गीना', 'gina': 'गीना', 'Nata': 'नाता', 'Nadha': 'नाधा', 'NaDha': 'नाधा', 'Dhagena': 'धागेना', 'dhagena': 'धागेना', 'takena': 'ताकेना', 'Kra': 'क्र', 'Digan': 'दिगन', 'Digana': 'दिगन', 'ghighi': 'घिघि',
+  'DHAGHEDNAG': 'धाघेड़नग', 'DHINGHEDNAG': 'धिनघेड़नग', 'DHASTAK': 'धाऽतक', 'DHADHATAK': 'धाधातक', 'DHADHASTAK': 'धाधातक', 'DHADHADHA': 'धाधाधा', 'TAKTAKTAK': 'तकतकतक',
+  'TINTINTIN': 'तिनतिनतिन', 'DHIGIDHIGIDHIGI': 'धिगधिगधिग', 'NAGENAGENAGE': 'नागेनागेनागे', 'TADHADHA': 'ताधाधा', 'DINDINDINA': 'दिनदिनदिना', 'KITADHAGHED': 'किटधाघेड़',
+  'NAGTAKDHIN': 'नगतकधिन', 'DHAGETRAKDHIN': 'धागेत्रकधिं', 'GHEDNAGDIN': 'घेड़नगदिन', 'DINAKITATA': 'दिनाकिटता', 'DHADHADIN': 'धाधादिन', 'DINDINAKITA': 'दिनदिनाकिट',
+  'TAKDHINDHAGE': 'तकधिनधागे', 'TRAKDHINGHED': 'त्रकधिनगेड़', 'NAGDINDINA': 'नगदिनदिना', 'KITATADHA': 'किटताधा', 'DHADINDIN': 'धादिनदिन', 'DINAKITADHA': 'दिनाकिटधा',
+  'GHEDNAGTAK': 'घेड़नगतक', 'DHINDHAGETRAK': 'धिनधागेत्रक', 'TINTINAKITA': 'तिनतिनाकिट', 'DHINDHINAKITA': 'धिनधिनाकिट',
+  'TAKEDNAK': 'ताकेड़नक', 'TINKEDNAK': 'तिनकेड़नक', 'TASTAK': 'ताऽतक', 'TATASTAK': 'तातातक', 'TATATA': 'ताताता',
   'S': 'ऽ', '-': '–'
 };
 
@@ -99,8 +100,9 @@ function saveCustomBolMapping(romanBol, devanagariBol) {
   if (!cleanRoman || !cleanDevanagari) return null;
 
   const customMap = _loadCustomBolMap();
-  customMap[cleanRoman] = cleanDevanagari;
+  if (customMap[cleanRoman] === cleanDevanagari) return cleanRoman;
 
+  customMap[cleanRoman] = cleanDevanagari;
   _saveCustomBolMapToLocalStorage(customMap);
   _rebuildBolDictionary();
   void pushBolDictionaryToServer(customMap);

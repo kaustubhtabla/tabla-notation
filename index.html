@@ -5,294 +5,379 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Bhatkhande.io — Professional Tabla Bhatkhande Notation Writer for composing, editing, and exporting Indian classical Tabla compositions.">
-  <title>Bhatkhande.io — Notation Writer</title>
-  <link rel="stylesheet" href="css/styles.css?v=104">
-  <style>
-    .matra-cell, .grouped-bol { 
-      font-size: 1.0rem !important; 
-    }
-    .bol-group-inner {
-      flex-wrap: nowrap !important;
-      white-space: nowrap !important;
-      width: fit-content !important;
-      max-width: calc(100% - 10px) !important;
-    }
-  </style>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪘</text></svg>">
-</head>
+    content="Bhatkhande.io helps Tabla students and teachers create, organize, and export Bhatkhande notation with ease.">
+  <title>Bhatkhande.io — Tabla Notation Workspace</title>
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('bhatkhande_io_theme') || 'auto';
+        const actualTheme = savedTheme === 'auto'
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : savedTheme;
+        document.documentElement.setAttribute('data-theme', actualTheme);
+        document.documentElement.setAttribute('data-theme-setting', savedTheme);
+      } catch (err) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme-setting', 'auto');
+      }
+    })();
+	  </script>
+	  <link rel="stylesheet" href="css/landing.css?v=6">
+	  <link rel="icon"
+	    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪘</text></svg>">
+	</head>
 
 <body>
-
-  <div class="app-container">
-    <header class="app-header" id="app-header">
-      <div class="header-left">
-        <button class="btn-icon btn-toggle-sidebar" id="btn-toggle-sidebar" title="Toggle sidebar">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
-        </button>
-
-        <a href="#" class="app-logo" title="Bhatkhande.io — Notation Writer">
-          <svg width="34" height="34" viewBox="0 0 64 64" class="logo-icon-svg" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="gold-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#e8a838;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#c47832;stop-opacity:1" />
-              </linearGradient>
-              <linearGradient id="head-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#ece6d8;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#b5ac94;stop-opacity:1" />
-              </linearGradient>
-            </defs>
-            <g class="drum-bayan" transform="translate(0, 5)">
-              <path d="M30 35 C30 55, 2 55, 2 35 S16 5, 30 15 Z" fill="url(#gold-grad)" stroke="#1a2540"
-                stroke-width="1.5" />
-              <ellipse cx="16" cy="18" rx="13" ry="8" fill="url(#head-grad)" stroke="#1a2540" stroke-width="1.5" />
-              <circle cx="16" cy="18" r="4.5" fill="#0c1120" />
-              <path d="M4 22 L2 35" stroke="#0c1120" stroke-width="1" stroke-linecap="round" />
-              <path d="M12 25 L10 40" stroke="#0c1120" stroke-width="1" stroke-linecap="round" />
-              <path d="M20 25 L22 40" stroke="#0c1120" stroke-width="1" stroke-linecap="round" />
-              <path d="M28 22 L30 35" stroke="#0c1120" stroke-width="1" stroke-linecap="round" />
-            </g>
-            <g class="drum-dayan" transform="translate(32, 2)">
-              <path d="M2 15 L2 40 Q2 48, 15 48 Q28 48, 28 40 L28 15 Z" fill="#c47832" stroke="#1a2540"
-                stroke-width="1.5" />
-              <ellipse cx="15" cy="15" rx="13" ry="8" fill="url(#head-grad)" stroke="#1a2540" stroke-width="1.5" />
-              <circle cx="15" cy="15" r="3.5" fill="#0c1120" />
-              <path d="M4 22 L4 40" stroke="#1a2540" stroke-width="1" stroke-linecap="round" />
-              <path d="M10 22 L10 40" stroke="#1a2540" stroke-width="1" stroke-linecap="round" />
-              <path d="M20 22 L20 40" stroke="#1a2540" stroke-width="1" stroke-linecap="round" />
-              <path d="M26 22 L26 40" stroke="#1a2540" stroke-width="1" stroke-linecap="round" />
-            </g>
-          </svg>
-          <div>
-            <div class="logo-text">Bhatkhande.io</div>
-            <div class="logo-subtitle">Notation Writer</div>
-          </div>
+  <div class="landing-page">
+    <header class="site-header">
+      <div class="shell header-row">
+        <a class="brand" href="#top">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <g transform="translate(0, 8)">
+                <path d="M28 31 C28 47, 4 47, 4 31 S15 8, 28 16 Z" fill="currentColor" />
+                <ellipse cx="16" cy="19" rx="10.5" ry="6.5" fill="rgba(255,255,255,0.82)" />
+                <circle cx="16" cy="19" r="3.1" fill="rgba(0,0,0,0.75)" />
+              </g>
+              <g transform="translate(33, 8)">
+                <path d="M3 14 L3 35 Q3 42 14 42 Q25 42 25 35 L25 14 Z" fill="currentColor" opacity="0.72" />
+                <ellipse cx="14" cy="14" rx="11" ry="6.5" fill="rgba(255,255,255,0.82)" />
+                <circle cx="14" cy="14" r="3" fill="rgba(0,0,0,0.75)" />
+              </g>
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <span class="brand-name">Bhatkhande.io</span>
+            <span class="brand-subtitle">Tabla Notation Editor</span>
+          </span>
         </a>
 
-        <span class="header-title-display" id="header-title-display">Untitled Composition</span>
-      </div>
+	        <nav class="site-nav" aria-label="Primary">
+	          <a href="#features">Features</a>
+	          <a href="#guide">Guide</a>
+	          <a href="#contact">Contact</a>
+	        </nav>
 
-      <div class="header-center">
-        <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3 7h7.5a3 3 0 110 6H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M6 4L3 7l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button class="btn-icon" id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M13 7H5.5a3 3 0 100 6H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M10 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        </button>
-
-        <div class="toolbar-separator"></div>
-
-        <button class="btn" id="btn-new" title="New composition">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M9 1H4a1.5 1.5 0 00-1.5 1.5v11A1.5 1.5 0 004 15h8a1.5 1.5 0 001.5-1.5V5.5L9 1z"
-              stroke="currentColor" stroke-width="1.3" />
-            <path d="M9 1v5h4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-          <span>New</span>
-        </button>
-        <button class="btn btn-primary" id="btn-save" title="Save (Ctrl+S)">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M12.5 15h-9A1.5 1.5 0 012 13.5v-11A1.5 1.5 0 013.5 1h7.09a1.5 1.5 0 011.06.44l1.91 1.91a1.5 1.5 0 01.44 1.06V13.5A1.5 1.5 0 0112.5 15z"
-              stroke="currentColor" stroke-width="1.3" />
-            <path d="M5 15v-4.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5V15" stroke="currentColor" stroke-width="1.3" />
-            <path d="M5 1v2.5a.5.5 0 00.5.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-          <span>Save</span>
-        </button>
-
-        <div class="toolbar-separator"></div>
-
-        <button class="btn btn-primary" id="btn-export-pdf" title="Export as PDF (Ctrl+P)">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2v9M4.5 7.5L8 11l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M2.5 11v2.5h11V11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-          <span>Export PDF</span>
-        </button>
-        <button class="btn" id="btn-import-json" title="Open saved composition (.json)">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M8 11V2M4.5 5.5L8 2l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M2.5 11v2.5h11V11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-          <span>Open</span>
-        </button>
-        <button class="btn" id="btn-export-json" title="Save backup as JSON file">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M9 1H4a1.5 1.5 0 00-1.5 1.5v11A1.5 1.5 0 004 15h8a1.5 1.5 0 001.5-1.5V5.5L9 1z"
-              stroke="currentColor" stroke-width="1.3" />
-            <path d="M9 1v5h4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-          <span>Backup</span>
-        </button>
-
-        <div class="toolbar-separator"></div>
-
-        <button class="btn" id="btn-home" title="Return to Dashboard Hub" style="background: var(--bg-elevated); border: 1px solid var(--border-color);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-          <span style="font-weight: 500; color: var(--goldPrimary);">Hub</span>
-        </button>
-
-        <input type="file" id="file-import-input" accept=".json" style="display:none">
-      </div>
-
-      <div class="header-right">
-        <div class="sync-status" id="sync-status" title="Checking connectivity...">
-          <div class="sync-dot"></div>
-          <span class="sync-label">Syncing...</span>
-        </div>
-        <div class="toolbar-separator"></div>
-        <button class="btn-icon" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
-          <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg id="icon-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-        </button>
-        <div class="toolbar-separator"></div>
-        <div class="script-toggle-wrapper">
-          <span class="script-toggle-label" id="script-label">Roman</span>
-          <label class="toggle-switch" title="Toggle Roman / Devanagari script">
-            <input type="checkbox" id="script-toggle">
-            <span class="toggle-slider"></span>
-          </label>
+        <div class="header-actions">
+          <button class="theme-toggle" id="theme-toggle" type="button" title="Theme: Auto (click to toggle)">Auto</button>
+          <a class="text-button" href="app.html">Open App</a>
+          <a class="primary-button" href="app.html">Start Writing Free</a>
         </div>
       </div>
     </header>
 
-    <div class="app-body">
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-section-title">Composition Details</div>
-          <div class="form-group">
-            <label class="form-label" for="comp-title">Title</label>
-            <input type="text" class="form-input" id="comp-title" value="Untitled Composition"
-              placeholder="Composition title...">
+    <main id="top">
+      <section class="hero-section">
+        <div class="shell hero-grid">
+          <div class="hero-copy">
+            <div class="hero-pill">New</div>
+            <div class="hero-label">Bhatkhande Notation Editor</div>
+            <h1>Create &amp; Share Tabla Notations With Ease</h1>
+            <p class="hero-description">
+              The modern workspace for documenting, learning, and exporting Tabla compositions using the standardized
+              Bhatkhande notation system.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-button" href="app.html">Get Started</a>
+              <a class="secondary-button" href="#features">Browse Features</a>
+            </div>
+            <div class="hero-meta">
+              English + Hindi support. PDF export. JSON backup. Built for Tabla students and teachers.
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-taal">Taal</label>
-            <select class="form-select" id="comp-taal"></select>
-            <div class="taal-info-display" id="taal-info-display"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-type">Composition Type</label>
-            <select class="form-select" id="comp-type"></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-laya">Laya (Tempo)</label>
-            <select class="form-select" id="comp-laya"></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-gharana">Gharana</label>
-            <input type="text" class="form-input" id="comp-gharana" placeholder="e.g., Delhi, Lucknow, Ajrada...">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-guru">Guru / Source</label>
-            <input type="text" class="form-input" id="comp-guru" placeholder="Teacher or source...">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="comp-notes">Notes</label>
-            <textarea class="form-textarea" id="comp-notes" placeholder="Additional notes or description..."></textarea>
+
+          <div class="hero-visual">
+            <div class="hero-shot-card">
+              <div class="shot-toolbar">
+                <div class="shot-dots" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="shot-caption">Live editor screenshot</div>
+              </div>
+              <img
+                class="hero-shot"
+                src="assets/screenshots/generated/editor-kayda.png"
+                alt="Actual screenshot of the Bhatkhande.io editor showing a teentaal kayda composition">
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="sidebar-section saved-compositions">
-          <div class="sidebar-section-title">Saved Compositions</div>
-          <div id="saved-compositions-list">
-            <div class="saved-empty">No saved compositions</div>
+      <section class="section-block" id="features">
+        <div class="shell">
+          <div class="section-head">
+            <div class="section-kicker">Features</div>
+            <h2>Everything You Need for Tabla Notations</h2>
+            <p>
+              Bhatkhande.io provides practical tools for creating, managing, and exporting Tabla compositions in a clean,
+              focused Bhatkhande notation workflow.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Bhatkhande Notation Editor</h3>
+              <p>Create and edit Tabla notation in a structured grid that matches the way compositions are actually taught and read.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Quick Bol Entry</h3>
+              <p>Type bols rapidly, move through matras quickly, and keep your attention on the composition rather than formatting.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Composition Management</h3>
+              <p>Save compositions with metadata like title, taal, type, laya, gharana, guru, and notes in one place.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Multiscript Support</h3>
+              <p>View the same notation in English and Hindi without maintaining separate copies for different learners.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Export Options</h3>
+              <p>Download compositions as PDF or JSON for printing, sharing, backup, and offline reference.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Teacher-Ready Workflow</h3>
+              <p>Prepare classroom handouts, practice sheets, and personal repertoire archives with clean, readable output.</p>
+            </article>
           </div>
         </div>
-      </aside>
+      </section>
 
-      <main class="main-content" id="main-content">
-        <div class="quick-entry-bar" id="quick-entry-bar">
-          <div class="qe-panel qe-panel-normal active" id="qe-panel-normal">
-            <select class="quick-entry-select" id="quick-entry-section">
-              <option value="0">Section 1</option>
-            </select>
-            <select class="quick-entry-select" id="quick-entry-avartan">
-              <option value="0">Avartan 1</option>
-            </select>
-            <input type="text" class="quick-entry-input" id="quick-entry-input"
-              placeholder="Type bols: Dha Dhin Dhin Dha ... use [Dha Ti] or digan=दिगन">
-            <button class="btn btn-primary" id="btn-quick-entry-apply">Apply</button>
-            <span class="quick-entry-hint">Space = next matra · [bols] = grouped · roman=देवनागरी saves a custom translation</span>
+	      <section class="section-block guide-section" id="guide">
+	        <div class="shell">
+	          <div class="section-head">
+	            <div class="section-kicker">How It Works</div>
+	            <h2>Create Notations in Three Simple Steps</h2>
+	            <p>
+	              Start from the Hub, write bols in the editor, and export a clean PDF when you're ready to print or share.
+	            </p>
+	          </div>
+
+	          <div class="guide-list">
+	            <article class="guide-card">
+	              <div class="guide-copy">
+	                <div class="guide-step">Step 1</div>
+	                <h3>Start from the Hub</h3>
+	                <p>Choose the taal and composition type, then jump into the workspace with the structure set up for you.</p>
+	              </div>
+	              <div class="guide-image-frame">
+	                <img src="assets/screenshots/guide/step-1.jpg" alt="Screenshot showing the Hub with taal and composition type selection">
+	              </div>
+	            </article>
+
+	            <article class="guide-card">
+	              <div class="guide-copy">
+	                <div class="guide-step">Step 2</div>
+	                <h3>Write in the Editor</h3>
+	                <p>Enter bols using the grid and quick entry bar, then build sections and avartans as your composition grows.</p>
+	              </div>
+	              <div class="guide-image-frame">
+	                <img src="assets/screenshots/guide/step-2.jpg" alt="Screenshot showing the notation editor with a composition loaded">
+	              </div>
+	            </article>
+
+	            <article class="guide-card">
+	              <div class="guide-copy">
+	                <div class="guide-step">Step 3</div>
+	                <h3>Export a Clean PDF</h3>
+	                <p>Generate a printable layout for practice, classroom handouts, or your personal archive.</p>
+	              </div>
+	              <div class="guide-image-frame">
+	                <img src="assets/screenshots/guide/step-3.jpg" alt="Screenshot showing a PDF-ready export preview of a composition">
+	              </div>
+	            </article>
+	          </div>
+	        </div>
+	      </section>
+
+	      <section class="section-block contact-section" id="contact">
+	        <div class="shell">
+	          <div class="section-head">
+            <div class="section-kicker">Contact</div>
+            <h2>Get In Touch</h2>
+            <p>
+              Have questions about Bhatkhande.io or want to shape the next set of features? Use the contact layout below,
+              then we can wire it to your preferred inbox when you're ready.
+            </p>
+          </div>
+
+          <div class="contact-grid">
+            <div class="contact-panel">
+              <div class="contact-label">Current focus</div>
+              <h3>Teacher-first Tabla notation workflow</h3>
+              <p>
+                The current build is strongest for writing, organizing, and exporting compositions cleanly. Cloud sync,
+                sharing, and teacher libraries are the next major product layer.
+              </p>
+
+              <div class="contact-detail">
+                <span>Product type</span>
+                <strong>Browser-based notation workspace</strong>
+              </div>
+              <div class="contact-detail">
+                <span>Live route</span>
+                <strong><a href="app.html">Open the editor</a></strong>
+              </div>
+              <div class="contact-detail">
+                <span>Support email</span>
+                <strong><a href="mailto:kaustnbh@gmail.com">kaustnbh@gmail.com</a></strong>
+              </div>
+            </div>
+
+            <form class="contact-form" id="contact-form">
+              <label class="form-field">
+                <span>First Name</span>
+                <input type="text" name="firstName" placeholder="Your first name" autocomplete="given-name">
+              </label>
+              <label class="form-field">
+                <span>Last Name</span>
+                <input type="text" name="lastName" placeholder="Your last name" autocomplete="family-name">
+              </label>
+              <label class="form-field full-width">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+              </label>
+              <label class="form-field full-width">
+                <span>Subject</span>
+                <input type="text" name="subject" placeholder="What would you like to discuss?">
+              </label>
+              <label class="form-field full-width">
+                <span>Message</span>
+                <textarea name="message" rows="5" placeholder="Share your question, idea, or feedback..." required></textarea>
+              </label>
+              <button class="primary-button stretch-button" id="contact-submit" type="submit">Send Message</button>
+              <p class="form-note" id="contact-form-status" role="status" aria-live="polite">Messages are sent directly to kaustnbh@gmail.com.</p>
+            </form>
           </div>
         </div>
+      </section>
+    </main>
 
-        <div id="notation-grid-container"></div>
-      </main>
-    </div>
+    <footer class="site-footer">
+      <div class="shell footer-row">
+        <div class="footer-copy">
+          <div class="footer-brand">Bhatkhande.io</div>
+          <p>Create, manage, and export Tabla compositions using the standardized Bhatkhande notation system.</p>
+        </div>
+	        <div class="footer-links">
+	          <a href="#features">Features</a>
+	          <a href="#guide">Guide</a>
+	          <a href="app.html">Web App</a>
+	        </div>
+	      </div>
+	    </footer>
   </div>
 
-  <div class="toast-container" id="toast-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      const contactForm = document.getElementById('contact-form');
+      const contactSubmit = document.getElementById('contact-submit');
+      const contactStatus = document.getElementById('contact-form-status');
+      const supportEmail = 'kaustnbh@gmail.com';
 
-  <div id="dashboard-hub" class="dashboard-overlay active">
-    <!-- Click backdrop to close if you want, but explicitly use buttons -->
-    <div class="dash-container">
-      <div class="dash-header">
-        <h1 class="dash-title">bhatkhande.io</h1>
-        <p class="dash-subtitle">Premium Indian Classical Workspace</p>
-      </div>
-      <div class="dash-body">
-        <div class="dash-panel new-comp-panel">
-          <h2 class="dash-panel-title">Start Composing</h2>
-          <div class="dash-form">
-            <label class="dash-label">Choose Taal</label>
-            <select id="dash-new-taal" class="dash-select"></select>
-            
-            <label class="dash-label" style="margin-top:16px;">Composition Type</label>
-            <select id="dash-new-type" class="dash-select"></select>
-            
-            <button id="btn-dash-create" class="dash-btn-primary">Create Canvas</button>
-          </div>
-        </div>
-        
-        <div class="dash-panel recent-panel">
-          <h2 class="dash-panel-title">Recent Compositions</h2>
-          <div id="dash-recent-list" class="dash-recent-grid">
-            <div class="dash-empty">Loading cloud compositions...</div>
-          </div>
-        </div>
-      </div>
-      <!-- Close button on top right, or just a small link at bottom -->
-      <button id="btn-dash-close" class="dash-close-btn" title="Close Workspace Hub">
-         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-  </div>
+      const setContactStatus = (message, state = 'idle') => {
+        if (!contactStatus) return;
+        contactStatus.textContent = message;
+        contactStatus.dataset.state = state;
+      };
 
-  <script src="js/taal-data.js?v=104"></script>
-  <script src="js/bol-input.js?v=104"></script>
-  <script src="js/composition.js?v=103"></script>
-  <script src="js/notation-grid.js?v=104"></script>
-  <script src="js/pdf-export.js?v=106"></script>
-  <script src="js/app.js?v=103"></script>
+      if (contactForm) {
+        contactForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
 
+          const formData = new FormData(contactForm);
+          const payload = {
+            firstName: (formData.get('firstName') || '').toString().trim(),
+            lastName: (formData.get('lastName') || '').toString().trim(),
+            email: (formData.get('email') || '').toString().trim(),
+            subject: (formData.get('subject') || '').toString().trim(),
+            message: (formData.get('message') || '').toString().trim()
+          };
+          const originalLabel = contactSubmit ? contactSubmit.textContent : 'Send Message';
+
+          if (contactSubmit) {
+            contactSubmit.disabled = true;
+            contactSubmit.textContent = 'Sending...';
+          }
+          setContactStatus('Sending your message...', 'pending');
+
+          try {
+            const response = await fetch('/api/contact', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok || result.status !== 'success') {
+              throw new Error(result.message || 'Could not send the message.');
+            }
+
+            contactForm.reset();
+            setContactStatus('Your message has been sent. I will get back to you soon.', 'success');
+          } catch (error) {
+            console.error('Contact form error:', error);
+            setContactStatus(`Could not send the message right now. Please try again or email ${supportEmail} directly.`, 'error');
+          } finally {
+            if (contactSubmit) {
+              contactSubmit.disabled = false;
+              contactSubmit.textContent = originalLabel;
+            }
+          }
+        });
+      }
+
+      if (!toggleBtn) return;
+
+      const themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      const themeKey = 'bhatkhande_io_theme';
+
+      const applyTheme = (themeSetting) => {
+        const actualTheme = themeSetting === 'auto'
+          ? (themeMedia.matches ? 'dark' : 'light')
+          : themeSetting;
+
+        if (themeSetting === 'auto') {
+          localStorage.removeItem(themeKey);
+        } else {
+          localStorage.setItem(themeKey, themeSetting);
+        }
+
+        document.documentElement.setAttribute('data-theme', actualTheme);
+        document.documentElement.setAttribute('data-theme-setting', themeSetting);
+        toggleBtn.textContent = themeSetting === 'auto'
+          ? 'Auto'
+          : themeSetting === 'dark'
+            ? 'Dark'
+            : 'Light';
+        toggleBtn.title = `Theme: ${toggleBtn.textContent} (click to toggle)`;
+      };
+
+      const savedTheme = localStorage.getItem(themeKey) || 'auto';
+      applyTheme(savedTheme);
+
+      toggleBtn.addEventListener('click', () => {
+        const currentSetting = document.documentElement.getAttribute('data-theme-setting') || 'auto';
+        const nextSetting = currentSetting === 'auto'
+          ? 'dark'
+          : currentSetting === 'dark'
+            ? 'light'
+            : 'auto';
+        applyTheme(nextSetting);
+      });
+
+      themeMedia.addEventListener('change', () => {
+        if (!localStorage.getItem(themeKey)) {
+          applyTheme('auto');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

@@ -21,6 +21,12 @@ const PDF_FONT_SIZE_OPTIONS = [
   { id: '13', label: '13 pt', notationPt: 13 }
 ];
 
+const PDF_IMPORT_TEXT_BEGIN = 'BHATKHANDE_PDF_IMPORT_BEGIN';
+const PDF_IMPORT_TEXT_END = 'BHATKHANDE_PDF_IMPORT_END';
+const PDF_IMPORT_TEXT_CHUNK = 'BHATKHANDE_PDF_IMPORT_CHUNK';
+const PDF_IMPORT_LINK_PREFIX = 'https://bhatkhande.io/pdf-import/v1/';
+const PDF_IMPORT_CHUNK_SIZE = 700;
+
 function getPdfPageOption(pageSizeId) {
   return PDF_PAGE_OPTIONS.find(option => option.id === pageSizeId) || PDF_PAGE_OPTIONS.find(option => option.id === 'A4') || PDF_PAGE_OPTIONS[0];
 }
@@ -43,7 +49,7 @@ class PdfExport {
     const storedFontSize = options.fontSize || localStorage.getItem('bhatkhande_io_pdf_font_size') || '10';
     const pageOption = getPdfPageOption(storedPageSize);
     const fontOption = getPdfFontSizeOption(storedFontSize);
-    const html = PdfExport._buildPrintHtml(composition, taal, script, pageOption, fontOption);
+    const html = PdfExport._buildPrintHtml(composition, taal, script, pageOption, fontOption, options);
     const pdfWindow = window.open('', '_blank', 'width=900,height=700');
     if (!pdfWindow) {
       alert(labels.popupBlocked);
@@ -69,48 +75,38 @@ class PdfExport {
     };
   }
 
-  static _buildPrintHtml(composition, taal, script, pageOption, fontOption) {
+  static _buildPrintHtml(composition, taal, script, pageOption, fontOption, options = {}) {
     const labels = PdfExport._labels(script);
-    const taalName = script === 'devanagari' ? taal.nameDevanagari : taal.name;
-    const compType = typeof getCompositionTypeInfo === 'function'
-      ? getCompositionTypeInfo(composition.compositionType)
-      : COMPOSITION_TYPES.find(t => t.id === composition.compositionType);
-    const compTypeName = compType ? (script === 'devanagari' ? compType.nameDevanagari : compType.name) : '';
-    const layaInfo = LAYA_TYPES.find(l => l.id === composition.laya);
-    const layaName = layaInfo ? (script === 'devanagari' ? layaInfo.nameDevanagari : layaInfo.name) : '';
-    const titleText = PdfExport._localizeText(composition.title || labels.untitledTitle, script, labels.untitledTitle);
-    const notesText = PdfExport._localizeText(composition.notes, script);
+    const includeOptionalDetails = !!options.includeOptionalDetails;
+    const optionalDetailsHtml = includeOptionalDetails
+      ? PdfExport._buildOptionalDetailsHtml(composition, script, labels)
+      : '';
 
     let sectionsHtml = '';
     composition.sections.forEach((section, sIdx) => {
       sectionsHtml += PdfExport._buildSectionHtml(composition, section, sIdx, taal, script, pageOption, fontOption);
     });
 
-    const matraText = script === 'devanagari'
-      ? `${PdfExport._formatNumber(taal.matras, script)} ${labels.matras}`
-      : `${taal.matras} ${labels.matras}`;
-
     const pageSizeOptions = PdfExport._buildPageSizeOptions(pageOption);
     const fontSizeOptions = PdfExport._buildFontSizeOptions(fontOption);
     const pageSizeStyle = PdfExport._buildPageSizeCss(pageOption);
     const fontSizeStyle = PdfExport._buildFontSizeCss(fontOption);
     const previewScript = PdfExport._buildPreviewScript(pageOption, fontOption);
+    const importPayloadHtml = PdfExport._buildImportPayloadHtml(composition);
 
     return `<!DOCTYPE html>
 <html lang="${labels.lang}">
 <head>
   <meta charset="UTF-8">
-  <title>${PdfExport._escapeHtml(titleText)} — ${PdfExport._escapeHtml(labels.brand)}</title>
+  <title></title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --pdf-notation-size: 10pt;
       --pdf-body-size: 10.5pt;
       --pdf-save-hint-size: 9.4pt;
-      --pdf-meta-size: 10.2pt;
       --pdf-notes-size: 10pt;
       --pdf-section-size: 12.5pt;
-      --pdf-footer-size: 8.5pt;
       --pdf-grid-gap: 12px;
       --pdf-vibhaag-gap: 8px;
       --pdf-text-baseline-offset: 10px;
@@ -190,36 +186,37 @@ class PdfExport {
       background: #44362b;
       border-color: #44362b;
     }
-    .pdf-header {
-      text-align: center;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #2a2119;
-    }
-    .pdf-meta {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px 18px;
-      color: #54463a;
-      font-size: var(--pdf-meta-size);
-    }
-    .pdf-meta-item {
-      display: inline-flex;
-      gap: 6px;
-      align-items: baseline;
-    }
-    .pdf-meta-label {
-      font-weight: 700;
-      color: #2a2119;
-    }
-    .pdf-notes {
+    .pdf-details {
       padding: 10px 14px;
       border-radius: 10px;
       background: #fbf8f1;
       border: 1px solid #e3dccd;
       color: #584b3d;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pdf-details-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      align-items: baseline;
+      justify-content: center;
+    }
+    .pdf-details-item {
+      display: inline-flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+    .pdf-details-label {
+      font-weight: 700;
+      color: #2a2119;
+    }
+    .pdf-notes {
+      color: inherit;
       font-size: var(--pdf-notes-size);
-      text-align: center;
+      text-align: left;
+      white-space: pre-wrap;
     }
     .pdf-section {
       page-break-inside: avoid;
@@ -235,10 +232,12 @@ class PdfExport {
       color: #2a2119;
     }
     .pdf-avartan {
-      border: 1px solid #e3dccd;
+      border: 1px solid transparent;
       border-radius: 12px;
       padding: 14px 14px 12px;
-      background: #fffdfa;
+      background:
+        linear-gradient(#fffdfa, #fffdfa) padding-box,
+        linear-gradient(#e3dccd, #e3dccd) border-box;
       margin-bottom: 14px;
       page-break-inside: avoid;
     }
@@ -376,15 +375,40 @@ class PdfExport {
       font-size: var(--pdf-notation-size);
       line-height: 1;
     }
-    .pdf-footer {
-      margin-top: 8px;
-      padding-top: 10px;
-      border-top: 1px solid #dfd7c7;
+    .pdf-import-payload {
+      margin-top: -18px;
+      max-height: 2pt;
+      overflow: hidden;
+      color: #fff;
+      font-size: 1pt;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: pre-wrap;
+    }
+    .pdf-import-text {
+      max-height: 1pt;
+      overflow: hidden;
+      color: #fff;
+    }
+    .pdf-import-line {
+      display: block;
+      color: #fff;
+      font-size: 1pt;
+      line-height: 1;
+      word-break: break-all;
+    }
+    .pdf-import-links {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: var(--pdf-footer-size);
-      color: #85715f;
+      flex-wrap: wrap;
+      gap: 1px;
+      max-height: 1pt;
+      overflow: hidden;
+    }
+    .pdf-import-link {
+      color: #fff !important;
+      font-size: 1pt;
+      line-height: 1;
+      text-decoration: none;
     }
   </style>
   <style id="pdf-page-size-style">${pageSizeStyle}</style>
@@ -402,19 +426,9 @@ class PdfExport {
         <button type="button" id="pdf-preview-print" class="pdf-preview-button">${PdfExport._escapeHtml(labels.printAction)}</button>
       </div>
     </div>
-    <div class="pdf-header">
-      <div class="pdf-meta">
-        <div class="pdf-meta-item"><span class="pdf-meta-label">${PdfExport._escapeHtml(`${labels.meta.taal}:`)}</span><span>${PdfExport._escapeHtml(`${taalName} (${matraText})`)}</span></div>
-        ${compTypeName ? `<div class="pdf-meta-item"><span class="pdf-meta-label">${PdfExport._escapeHtml(`${labels.meta.type}:`)}</span><span>${PdfExport._escapeHtml(compTypeName)}</span></div>` : ''}
-        ${layaName ? `<div class="pdf-meta-item"><span class="pdf-meta-label">${PdfExport._escapeHtml(`${labels.meta.laya}:`)}</span><span>${PdfExport._escapeHtml(layaName)}</span></div>` : ''}
-      </div>
-    </div>
-    ${notesText ? `<div class="pdf-notes">${PdfExport._escapeHtml(notesText)}</div>` : ''}
+    ${optionalDetailsHtml}
     ${sectionsHtml}
-    <div class="pdf-footer">
-      <span>${PdfExport._escapeHtml(`${titleText} • ${taalName}`)}</span>
-      <span>${PdfExport._escapeHtml(labels.footer)}</span>
-    </div>
+    ${importPayloadHtml}
   </div>
   <script>
     ${previewScript}
@@ -437,9 +451,10 @@ class PdfExport {
 
   static _buildPageSizeCss(pageOption) {
     return `@media print {
-      body { padding: 11mm 10mm; }
-      .save-hint { display: none; }
-      @page { size: ${pageOption.cssName}; margin: 10mm; }
+      @page { size: ${pageOption.cssName}; margin: 0; }
+      html, body { margin: 0 !important; }
+      body { padding: 21mm 20mm; }
+      .save-hint { display: none !important; }
     }
     @media screen {
       body {
@@ -458,10 +473,8 @@ class PdfExport {
       --pdf-notation-size: ${round(notationPt)}pt;
       --pdf-body-size: ${round(10.5 * scale)}pt;
       --pdf-save-hint-size: ${round(9.4 * scale)}pt;
-      --pdf-meta-size: ${round(10.2 * scale)}pt;
       --pdf-notes-size: ${round(10 * scale)}pt;
       --pdf-section-size: ${round(12.5 * scale)}pt;
-      --pdf-footer-size: ${round(8.5 * scale)}pt;
       --pdf-text-baseline-offset: ${round(10 * scale)}px;
       --pdf-matra-min-height: ${round(27 * scale)}pt;
       --pdf-marker-min-height: ${round(18 * scale)}pt;
@@ -470,6 +483,90 @@ class PdfExport {
       --pdf-word-curve-border-width: ${round(1.35 * scale)}px;
       --pdf-word-curve-radius: ${round(12 * scale)}px;
     }`;
+  }
+
+  static _buildOptionalDetailsHtml(composition, script, labels) {
+    const detailItems = [];
+    const layaInfo = LAYA_TYPES.find(l => l.id === composition.laya);
+    const layaName = layaInfo ? (script === 'devanagari' ? layaInfo.nameDevanagari : layaInfo.name) : '';
+    const gharanaText = PdfExport._localizeText(composition.gharana, script);
+    const guruText = PdfExport._localizeText(composition.guru, script);
+    const notesText = PdfExport._localizeText(composition.notes, script);
+
+    if (layaName) {
+      detailItems.push(
+        `<div class="pdf-details-item"><span class="pdf-details-label">${PdfExport._escapeHtml(labels.meta.laya)}</span><span>${PdfExport._escapeHtml(layaName)}</span></div>`
+      );
+    }
+    if (gharanaText) {
+      detailItems.push(
+        `<div class="pdf-details-item"><span class="pdf-details-label">${PdfExport._escapeHtml(labels.meta.gharana)}</span><span>${PdfExport._escapeHtml(gharanaText)}</span></div>`
+      );
+    }
+    if (guruText) {
+      detailItems.push(
+        `<div class="pdf-details-item"><span class="pdf-details-label">${PdfExport._escapeHtml(labels.meta.guru)}</span><span>${PdfExport._escapeHtml(guruText)}</span></div>`
+      );
+    }
+
+    if (detailItems.length === 0 && !notesText) {
+      return '';
+    }
+
+    const notesHtml = notesText
+      ? `<div class="pdf-notes"><span class="pdf-details-label">${PdfExport._escapeHtml(labels.meta.notes)}</span> ${PdfExport._escapeHtml(notesText)}</div>`
+      : '';
+
+    return `<div class="pdf-details">
+      ${detailItems.length > 0 ? `<div class="pdf-details-grid">${detailItems.join('')}</div>` : ''}
+      ${notesHtml}
+    </div>`;
+  }
+
+  static _buildImportPayloadHtml(composition) {
+    const payload = PdfExport._encodeImportPayload({
+      app: 'bhatkhande.io',
+      kind: 'composition-pdf-export',
+      version: 1,
+      composition: composition.toJSON()
+    });
+    const chunkCount = Math.max(1, Math.ceil(payload.length / PDF_IMPORT_CHUNK_SIZE));
+    const lines = [`${PDF_IMPORT_TEXT_BEGIN} v1 ${chunkCount}`];
+    const links = [];
+
+    for (let idx = 0; idx < chunkCount; idx++) {
+      const partNumber = idx + 1;
+      const partLabel = String(partNumber).padStart(4, '0');
+      const totalLabel = String(chunkCount).padStart(4, '0');
+      const chunk = payload.slice(idx * PDF_IMPORT_CHUNK_SIZE, (idx + 1) * PDF_IMPORT_CHUNK_SIZE);
+      lines.push(`${PDF_IMPORT_TEXT_CHUNK} ${partLabel}/${totalLabel} ${chunk}`);
+      links.push(
+        `<a class="pdf-import-link" href="${PDF_IMPORT_LINK_PREFIX}${partLabel}-of-${totalLabel}/${chunk}" aria-hidden="true">.</a>`
+      );
+    }
+
+    lines.push(PDF_IMPORT_TEXT_END);
+
+    return `<div class="pdf-import-payload" aria-hidden="true">
+      <div class="pdf-import-text">${lines.map(line => `<span class="pdf-import-line">${PdfExport._escapeHtml(line)}</span>`).join('')}</div>
+      <div class="pdf-import-links">${links.join('')}</div>
+    </div>`;
+  }
+
+  static _encodeImportPayload(data) {
+    const json = JSON.stringify(data);
+    const bytes = new TextEncoder().encode(json);
+    const chunkSize = 0x8000;
+    const binaryChunks = [];
+
+    for (let idx = 0; idx < bytes.length; idx += chunkSize) {
+      binaryChunks.push(String.fromCharCode.apply(null, bytes.subarray(idx, idx + chunkSize)));
+    }
+
+    return btoa(binaryChunks.join(''))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
   }
 
   static _buildPreviewScript(pageOption, fontOption) {
@@ -489,9 +586,10 @@ class PdfExport {
 
         function buildPageSizeCss(option) {
           return \`@media print {
-            body { padding: 11mm 10mm; }
-            .save-hint { display: none; }
-            @page { size: \${option.cssName}; margin: 10mm; }
+            @page { size: \${option.cssName}; margin: 0; }
+            html, body { margin: 0 !important; }
+            body { padding: 21mm 20mm; }
+            .save-hint { display: none !important; }
           }
           @media screen {
             body {
@@ -510,10 +608,8 @@ class PdfExport {
             --pdf-notation-size: \${round(notationPt)}pt;
             --pdf-body-size: \${round(10.5 * scale)}pt;
             --pdf-save-hint-size: \${round(9.4 * scale)}pt;
-            --pdf-meta-size: \${round(10.2 * scale)}pt;
             --pdf-notes-size: \${round(10 * scale)}pt;
             --pdf-section-size: \${round(12.5 * scale)}pt;
-            --pdf-footer-size: \${round(8.5 * scale)}pt;
             --pdf-text-baseline-offset: \${round(10 * scale)}px;
             --pdf-matra-min-height: \${round(27 * scale)}pt;
             --pdf-marker-min-height: \${round(18 * scale)}pt;
@@ -1082,7 +1178,6 @@ class PdfExport {
     if (script === 'devanagari') {
       return {
         lang: 'hi',
-        brand: 'bhatkhande.io',
         untitledTitle: 'अशीर्षक रचना',
         popupBlocked: 'पीडीएफ निर्यात करने के लिए कृपया पॉप-अप की अनुमति दें।',
         saveHint: 'पृष्ठ आकार और फ़ॉन्ट आकार चुनें, फिर "प्रिंट / पीडीएफ सुरक्षित करें" का उपयोग करें।',
@@ -1095,20 +1190,19 @@ class PdfExport {
           type: 'प्रकार:',
           laya: 'लय:',
           gharana: 'घराना:',
-          guru: 'गुरु / स्रोत:'
+          guru: 'गुरु / स्रोत:',
+          notes: 'टिप्पणियाँ:'
         },
         info: {
           structure: 'विभाग विन्यास',
           markers: 'चिह्न',
           theka: 'ठेका'
-        },
-        footer: 'bhatkhande.io द्वारा तैयार'
+        }
       };
     }
 
     return {
       lang: 'en',
-      brand: 'Bhatkhande.io',
       untitledTitle: 'Untitled Composition',
       popupBlocked: 'Please allow pop-ups to export PDF.',
       saveHint: 'Choose the page size and font size here, then use Print / Save PDF.',
@@ -1121,14 +1215,14 @@ class PdfExport {
         type: 'Type:',
         laya: 'Laya:',
         gharana: 'Gharana:',
-        guru: 'Guru / Source:'
+        guru: 'Guru / Source:',
+        notes: 'Notes:'
       },
       info: {
         structure: 'Structure',
         markers: 'Markers',
         theka: 'Theka'
-      },
-      footer: 'Generated by Bhatkhande.io'
+      }
     };
   }
 
