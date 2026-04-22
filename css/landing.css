@@ -395,15 +395,15 @@ textarea {
 
 .guide-list {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
 .guide-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-  gap: 22px;
+  display: flex;
+  flex-direction: column;
   padding: 22px;
-  align-items: center;
+  overflow: hidden;
 }
 
 .guide-step {
@@ -420,11 +420,14 @@ textarea {
   border-radius: 14px;
   border: 1px solid var(--border);
   background: var(--bg-soft);
+  margin-bottom: 18px;
 }
 
 .guide-image-frame img {
   width: 100%;
   border-radius: 10px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
 .stretch-button {
@@ -563,16 +566,14 @@ textarea {
 @media (max-width: 1100px) {
   .hero-grid,
   .contact-grid,
-  .guide-card {
+  .guide-list {
     grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
   }
 
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .guide-image-frame {
-    max-width: 520px;
   }
 }
 
