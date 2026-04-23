@@ -451,9 +451,8 @@ class PdfExport {
 
   static _buildPageSizeCss(pageOption) {
     return `@media print {
-      @page { size: ${pageOption.cssName}; margin: 0; }
-      html, body { margin: 0 !important; }
-      body { padding: 21mm 20mm; }
+      @page { size: ${pageOption.cssName}; margin: 21mm 20mm; }
+      html, body { margin: 0 !important; padding: 0 !important; }
       .save-hint { display: none !important; }
     }
     @media screen {
@@ -586,9 +585,8 @@ class PdfExport {
 
         function buildPageSizeCss(option) {
           return \`@media print {
-            @page { size: \${option.cssName}; margin: 0; }
-            html, body { margin: 0 !important; }
-            body { padding: 21mm 20mm; }
+            @page { size: \${option.cssName}; margin: 21mm 20mm; }
+            html, body { margin: 0 !important; padding: 0 !important; }
             .save-hint { display: none !important; }
           }
           @media screen {
