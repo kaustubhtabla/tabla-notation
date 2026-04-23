@@ -44,7 +44,17 @@ const bhatkhande = {
 
       this.notationGrid = new NotationGrid(gridContainer, this.composition, this.bolInput);
       this.notationGrid.onCompositionChanged = () => this._onCompositionChanged();
-      this.notationGrid.onAddSection = () => this.addSection();
+      this.notationGrid.onAddSection = (type) => {
+        if (type === 'dugun') {
+           this.composition.generateLayakariSection(0, '2', 'Dugun');
+           this.notationGrid.render();
+           this._onCompositionChanged();
+           this._showToast('Dugun section generated', 'success');
+           return;
+        }
+        this.addSection(type);
+      };
+      this.notationGrid.onCellClicked = (sIdx, aIdx, mIdx) => this._onCellClicked(sIdx, aIdx, mIdx);
 
       this._initTheme();
       this._initDashboard();
@@ -59,6 +69,7 @@ const bhatkhande = {
       this._applyOptionalDetailsVisibility();
 
       this._startAutoSave();
+      this._initOnboarding();
     } catch (err) {
       console.error('bhatkhande.io initialization failed:', err);
     }
@@ -208,7 +219,6 @@ const bhatkhande = {
 
   _openDashboard() {
     document.getElementById('dashboard-hub')?.classList.add('active');
-    this._populateDashboardRecent();
     this._populateLibraryPanel();
   }
 
@@ -240,52 +250,7 @@ const bhatkhande = {
     return utilityOptions + categorizedGroups;
   }
 
-  async _populateDashboardRecent() {
-    const listEl = document.getElementById('dash-recent-list');
-    if (!listEl) return;
-    
-    const saved = this._sortSavedByRecent(await Composition.listSaved());
-    
-    let html = '';
-    
-    if (!this.isOnline) {
-      html += `
-        <div class="dash-offline-notice">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          Running in Local Workspace mode. Start the sync server to enable cloud backup.
-        </div>
-      `;
-    }
 
-    if (saved.length === 0) {
-      html += `<div class="dash-empty">${this.isOnline ? 'No saved compositions in the cloud... Start typing!' : 'No local compositions found yet. Create one below!'}</div>`;
-      listEl.innerHTML = html;
-      return;
-    }
-
-    html += saved.map(c => {
-      const taal = TAAL_DATABASE[c.taalId];
-      const date = new Date(c.updatedAt).toLocaleDateString();
-      return `
-        <div class="dash-recent-card" data-id="${c.id}">
-          <div class="dash-card-title">${this._escapeHtml(c.title || 'Untitled Workspace')}</div>
-          <div class="dash-card-taal">${taal ? taal.name : c.taalId}</div>
-          <div class="dash-card-date">${date}</div>
-        </div>
-      `;
-    }).join('');
-    
-    listEl.innerHTML = html;
-
-    listEl.querySelectorAll('.dash-recent-card').forEach(item => {
-      item.addEventListener('click', () => {
-        this.loadComposition(item.getAttribute('data-id'));
-      });
-    });
-  }
 
   async checkConnectivity() {
     this._updateSyncStatus('syncing');
@@ -504,15 +469,45 @@ const bhatkhande = {
 
     document.getElementById('btn-home')?.addEventListener('click', () => {
       this._openDashboard();
+      document.getElementById('toolbar-overflow-menu')?.classList.remove('active');
     });
     document.getElementById('btn-new')?.addEventListener('click', () => {
        document.getElementById('dashboard-hub')?.classList.add('active');
-       this._populateDashboardRecent();
+       document.getElementById('toolbar-overflow-menu')?.classList.remove('active');
     });
     document.getElementById('btn-save')?.addEventListener('click', () => this.saveComposition());
     document.getElementById('btn-export-pdf')?.addEventListener('click', () => this.exportPDF());
-    document.getElementById('btn-export-json')?.addEventListener('click', () => this.exportJSON());
-    document.getElementById('btn-import-json')?.addEventListener('click', () => this.importJSON());
+    document.getElementById('btn-export-json')?.addEventListener('click', () => {
+      this.exportJSON();
+      document.getElementById('toolbar-overflow-menu')?.classList.remove('active');
+    });
+    document.getElementById('btn-import-json')?.addEventListener('click', () => {
+      this.importJSON();
+      document.getElementById('toolbar-overflow-menu')?.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const hub = document.getElementById('dashboard-hub');
+        if (hub && hub.classList.contains('active')) {
+          hub.classList.remove('active');
+        }
+      }
+    });
+
+    const btnToolbarMore = document.getElementById('btn-toolbar-more');
+    const toolbarOverflowMenu = document.getElementById('toolbar-overflow-menu');
+    if (btnToolbarMore && toolbarOverflowMenu) {
+      btnToolbarMore.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toolbarOverflowMenu.classList.toggle('active');
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.toolbar-overflow')) {
+          toolbarOverflowMenu.classList.remove('active');
+        }
+      });
+    }
     document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
     document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
 
@@ -528,11 +523,22 @@ const bhatkhande = {
           this.applyQuickEntry();
         }
       });
+      // Highlight target avartan when input is focused
+      quickEntryInput.addEventListener('focus', () => this._highlightQuickEntryTarget());
+      quickEntryInput.addEventListener('blur', () => this._clearAvartanHighlight());
     }
 
     const quickSectionSelect = document.getElementById('quick-entry-section');
     if (quickSectionSelect) {
-      quickSectionSelect.addEventListener('change', () => this._refreshAvartanDropdown());
+      quickSectionSelect.addEventListener('change', () => {
+        this._refreshAvartanDropdown();
+        this._highlightQuickEntryTarget();
+      });
+    }
+
+    const quickAvartanSelect = document.getElementById('quick-entry-avartan');
+    if (quickAvartanSelect) {
+      quickAvartanSelect.addEventListener('change', () => this._highlightQuickEntryTarget());
     }
 
     const fileInput = document.getElementById('file-import-input');
@@ -556,9 +562,23 @@ const bhatkhande = {
       if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); this.exportPDF(); }
     });
 
-    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
-      document.getElementById('sidebar')?.classList.toggle('sidebar-open');
-    });
+    // Sidebar toggle (right-side info panel)
+    const sidebarEl = document.getElementById('sidebar');
+    const overlayEl = document.getElementById('sidebar-overlay');
+    const infoBtn = document.getElementById('btn-toggle-sidebar');
+    const closeBtn = document.getElementById('sidebar-close-btn');
+
+    const toggleSidebar = (forceState) => {
+      if (!sidebarEl) return;
+      const shouldOpen = forceState !== undefined ? forceState : !sidebarEl.classList.contains('sidebar-open');
+      sidebarEl.classList.toggle('sidebar-open', shouldOpen);
+      overlayEl?.classList.toggle('visible', shouldOpen);
+      infoBtn?.classList.toggle('active', shouldOpen);
+    };
+
+    infoBtn?.addEventListener('click', () => toggleSidebar());
+    closeBtn?.addEventListener('click', () => toggleSidebar(false));
+    overlayEl?.addEventListener('click', () => toggleSidebar(false));
   }
 
   async newCompositionFromDash(taalId, typeId) {
@@ -634,13 +654,13 @@ const bhatkhande = {
     }
   }
 
-  addSection() {
+  addSection(forceType = null) {
     const sections = this.composition.sections;
     const expandable = typeof isExpandableCompositionType === 'function' &&
       isExpandableCompositionType(this.composition.compositionType);
-    let newType = expandable ? 'palta' : 'custom';
+    let newType = forceType || (expandable ? 'palta' : 'custom');
 
-    if (!expandable && sections.length > 0) {
+    if (!forceType && !expandable && sections.length > 0) {
       const lastSection = sections[sections.length - 1];
       if (lastSection.type !== 'mukh') newType = lastSection.type;
     }
@@ -693,6 +713,79 @@ const bhatkhande = {
   _onCompositionChanged() {
     this._updateUndoRedoButtons();
     this._updateQuickEntrySelectors();
+  }
+
+  // ── Phase 1: Unified Input Targeting ──────────────────────────────────
+
+  _onCellClicked(sIdx, aIdx, mIdx) {
+    // Auto-target Quick Entry bar to this cell's section/avartan
+    const sectionSelect = document.getElementById('quick-entry-section');
+    const avartanSelect = document.getElementById('quick-entry-avartan');
+
+    if (sectionSelect && sIdx >= 0 && sIdx < this.composition.sections.length) {
+      sectionSelect.value = String(sIdx);
+      this._refreshAvartanDropdown();
+    }
+
+    if (avartanSelect) {
+      const section = this.composition.sections[sIdx];
+      if (section && aIdx >= 0 && aIdx < section.avartans.length) {
+        avartanSelect.value = String(aIdx);
+      }
+    }
+
+    // Update the context indicator
+    this._updateQuickEntryContext(sIdx, aIdx, mIdx);
+
+    // Highlight the target avartan in the grid
+    this._highlightQuickEntryTarget();
+
+    // Pulse the Quick Entry bar to draw attention
+    const qeBar = document.getElementById('quick-entry-bar');
+    if (qeBar) {
+      qeBar.classList.remove('qe-pulse');
+      void qeBar.offsetWidth; // trigger reflow
+      qeBar.classList.add('qe-pulse');
+    }
+  }
+
+  _updateQuickEntryContext(sIdx, aIdx, mIdx) {
+    let contextEl = document.getElementById('qe-context-indicator');
+    if (!contextEl) {
+      const qeInputRow = document.querySelector('.qe-input-row');
+      if (!qeInputRow) return;
+      contextEl = document.createElement('div');
+      contextEl.id = 'qe-context-indicator';
+      contextEl.className = 'qe-context-indicator';
+      qeInputRow.parentElement.insertBefore(contextEl, qeInputRow);
+    }
+
+    const section = this.composition.sections[sIdx];
+    const sectionName = section ? section.label : `Section ${sIdx + 1}`;
+    contextEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1v14M1 8l7-7 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Typing into: <strong>${this._escapeHtml(sectionName)}</strong>, Avartan ${aIdx + 1}, Matra ${mIdx + 1}`;
+    contextEl.style.display = 'flex';
+  }
+
+  _highlightQuickEntryTarget() {
+    this._clearAvartanHighlight();
+
+    const sectionSelect = document.getElementById('quick-entry-section');
+    const avartanSelect = document.getElementById('quick-entry-avartan');
+    if (!sectionSelect || !avartanSelect) return;
+
+    const sIdx = parseInt(sectionSelect.value) || 0;
+    const aIdx = parseInt(avartanSelect.value) || 0;
+
+    const targetBlock = document.querySelector(`.avartan-block[data-section="${sIdx}"][data-avartan="${aIdx}"]`);
+    if (targetBlock) {
+      targetBlock.classList.add('avartan-target-highlight');
+    }
+  }
+
+  _clearAvartanHighlight() {
+    document.querySelectorAll('.avartan-target-highlight').forEach(el => {
+      el.classList.remove('avartan-target-highlight');
+    });
   }
 
   _updateMetadataPanel() {
@@ -869,7 +962,10 @@ const bhatkhande = {
 
     // Try API endpoint first (local sync server)
     try {
-      const response = await fetch('/api/library', { signal: AbortSignal.timeout(2000) });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const response = await fetch('/api/library', { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         const contentType = response.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
@@ -884,7 +980,10 @@ const bhatkhande = {
 
     // Static JSON fallback (GitHub Pages, file://, or server unavailable)
     try {
-      const response = await fetch('data/library.json', { signal: AbortSignal.timeout(3000) });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const response = await fetch('data/library.json', { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -987,6 +1086,92 @@ const bhatkhande = {
     this._updateSavedList();
     document.getElementById('dashboard-hub')?.classList.remove('active');
     this._showToast(`"${entry.title}" loaded from library`, 'success');
+  }
+
+  _initOnboarding() {
+    if (localStorage.getItem('bhatkhande_onboarding_done')) return;
+    
+    // Only start onboarding when a composition is loaded and UI is visible
+    setTimeout(() => {
+      if (document.getElementById('dashboard-hub')?.classList.contains('active')) return;
+      this._startOnboarding();
+    }, 1000);
+  }
+
+  _startOnboarding() {
+    this.currentObStep = 0;
+    this.obSteps = [
+      {
+        title: 'Quick Entry Bar',
+        desc: 'Type your bols here. Use spaces between matras, and brackets [Dha Ti] to group them. Press Enter to apply.',
+        targetSelector: '#quick-entry-input'
+      },
+      {
+        title: 'Direct Grid Editing',
+        desc: 'Click on any cell in the notation grid to directly edit it or target the Quick Entry bar to that specific matra.',
+        targetSelector: '.matra-cell'
+      },
+      {
+        title: 'Contextual Actions',
+        desc: 'Use the section header dropdowns or the bottom split-button to instantly generate Layakaris and new sections.',
+        targetSelector: '#add-section-split-container'
+      }
+    ];
+
+    const overlay = document.getElementById('onboarding-overlay');
+    const skipBtn = document.getElementById('btn-ob-skip');
+    const nextBtn = document.getElementById('btn-ob-next');
+
+    if (!overlay) return;
+
+    skipBtn.onclick = () => this._endOnboarding();
+    nextBtn.onclick = () => this._nextOnboardingStep();
+
+    overlay.classList.add('active');
+    this._showOnboardingStep();
+  }
+
+  _showOnboardingStep() {
+    const step = this.obSteps[this.currentObStep];
+    const stepCountEl = document.getElementById('ob-current-step');
+    const titleEl = document.getElementById('ob-title');
+    const descEl = document.getElementById('ob-desc');
+    const nextBtn = document.getElementById('btn-ob-next');
+
+    if (stepCountEl) stepCountEl.textContent = this.currentObStep + 1;
+    if (titleEl) titleEl.textContent = step.title;
+    if (descEl) descEl.textContent = step.desc;
+
+    if (nextBtn) {
+      if (this.currentObStep === this.obSteps.length - 1) {
+        nextBtn.textContent = 'Finish';
+      } else {
+        nextBtn.textContent = 'Next →';
+      }
+    }
+
+    document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
+
+    const targetEl = document.querySelector(step.targetSelector);
+    if (targetEl) {
+      targetEl.classList.add('onboarding-highlight');
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  _nextOnboardingStep() {
+    if (this.currentObStep >= this.obSteps.length - 1) {
+      this._endOnboarding();
+    } else {
+      this.currentObStep++;
+      this._showOnboardingStep();
+    }
+  }
+
+  _endOnboarding() {
+    document.getElementById('onboarding-overlay')?.classList.remove('active');
+    document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
+    localStorage.setItem('bhatkhande_onboarding_done', 'true');
   }
   }
 };

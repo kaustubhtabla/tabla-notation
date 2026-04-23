@@ -560,14 +560,17 @@ class Composition {
 
   static async _writeSavedList(list) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       localStorage.setItem(Composition.STORAGE_KEY, JSON.stringify(list));
       
       const response = await fetch('/api/compositions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(list),
-        signal: AbortSignal.timeout(2000) // Don't hang forever on slow/dead connections
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       return response.ok;
     } catch (e) {
       console.warn('Sync Server unavailable, using local storage only.');
@@ -618,7 +621,10 @@ class Composition {
 
   static async listSaved() {
     try {
-      const response = await fetch('/api/compositions', { signal: AbortSignal.timeout(2000) });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const response = await fetch('/api/compositions', { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         const data = await response.json();
         const sanitized = Composition._sanitizeSavedList(data);

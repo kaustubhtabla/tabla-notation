@@ -13,6 +13,7 @@ class NotationGrid {
     this.activeCell = null;
     this.onCompositionChanged = null;
     this.onAddSection = null;
+    this.onCellClicked = null; // callback(sIdx, aIdx, mIdx) for Quick Entry targeting
 
     this.bolInput.onBolChanged = (sIdx, aIdx, mIdx, bols) => {
       this.composition.setBol(sIdx, aIdx, mIdx, bols);
@@ -23,6 +24,20 @@ class NotationGrid {
     this.bolInput.onNavigate = (direction) => {
       this._navigateFromActive(direction);
     };
+
+    // Global click listener to close popups and unactivate cells
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.matra-cell') && !e.target.closest('.bol-input-overlay')) {
+        this.bolInput.hide();
+        this.activeCell = null;
+        if (this.container) {
+          this.container.querySelectorAll('.cell-active').forEach(c => c.classList.remove('cell-active'));
+        }
+      }
+      if (!e.target.closest('#add-section-split-container') && this.container) {
+        this.container.querySelector('#add-section-menu')?.classList.remove('active');
+      }
+    });
   }
 
   setScript(script) {
@@ -43,12 +58,49 @@ class NotationGrid {
       html += this._renderSection(section, sIdx, taal);
     });
 
+    const compType = this.composition.compositionType || 'custom';
+    let primaryAddLabel = 'Add Section';
+    let primaryAddType = 'custom';
+    let optionsHtml = '';
+
+    if (compType === 'kayda' || compType === 'peshkar') {
+      primaryAddLabel = 'Add Palta';
+      primaryAddType = 'palta';
+      optionsHtml = `
+        <button class="add-section-option" data-type="palta">Add Palta</button>
+        <button class="add-section-option" data-type="tihai">Add Tihai</button>
+        <button class="add-section-option" data-type="custom">Add Custom Section</button>
+      `;
+    } else if (compType === 'theka') {
+      primaryAddLabel = 'Add Layakari (Dugun)';
+      primaryAddType = 'dugun';
+      optionsHtml = `
+        <button class="add-section-option" data-type="dugun">Add Dugun Section</button>
+        <button class="add-section-option" data-type="custom">Add Custom Section</button>
+      `;
+    } else {
+      primaryAddLabel = 'Add Section';
+      primaryAddType = 'custom';
+      optionsHtml = `
+        <button class="add-section-option" data-type="custom">Add Section</button>
+        <button class="add-section-option" data-type="tihai">Add Tihai</button>
+      `;
+    }
+
     html += `
       <div class="add-section-bar">
-        <button class="btn-add-section" id="btn-add-section">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Add Section
-        </button>
+        <div class="add-section-split-btn" id="add-section-split-container">
+          <button class="btn-add-section-primary" id="btn-add-section-primary" data-type="${primaryAddType}">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            ${primaryAddLabel}
+          </button>
+          <button class="btn-add-section-dropdown" id="btn-add-section-dropdown" title="More options">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="add-section-menu" id="add-section-menu">
+            ${optionsHtml}
+          </div>
+        </div>
       </div>`;
 
     this.container.innerHTML = html;
@@ -67,17 +119,24 @@ class NotationGrid {
             <input type="text" class="section-label-input" value="${this._escapeHtml(section.label)}" data-section="${sIdx}">
           </div>
           <div class="section-header-right">
-            <select class="form-select fill-theka-speed" data-section="${sIdx}" style="width: auto; padding: 2px 6px; font-size: 0.75rem; height: 26px; border-color: transparent; background-color: var(--bg-elevated); margin-right: 4px;">
-                <option value="1">Thah (1x)</option>
-                <option value="2">Dugun (2x)</option>
-                <option value="3">Tigun (3x)</option>
-                <option value="4">Chaugun (4x)</option>
-                <option value="3/2">Aad (3/2)</option>
-                <option value="5/4">Kuad (5/4)</option>
-                <option value="7/4">Biyad (7/4)</option>
-            </select>
-            <button class="btn-icon btn-fill-theka" data-section="${sIdx}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M2 4h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
-            <button class="btn-icon btn-remove-section" data-section="${sIdx}" ${this.composition.sections.length <= 1 ? 'disabled' : ''}><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+            <div class="layakari-generator-group">
+              <select class="form-select fill-theka-speed" data-section="${sIdx}" title="Select Layakari speed">
+                  <option value="" disabled selected>Layakari</option>
+                  <option value="1">Thah (1x)</option>
+                  <option value="2">Dugun (2x)</option>
+                  <option value="3">Tigun (3x)</option>
+                  <option value="4">Chaugun (4x)</option>
+                  <option value="3/2">Aad (3/2)</option>
+                  <option value="5/4">Kuad (5/4)</option>
+                  <option value="7/4">Biyad (7/4)</option>
+              </select>
+              <button class="btn-generate-layakari btn-fill-theka" data-section="${sIdx}" title="Generate Section">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 1L2.5 9h4.5v6l7-8h-5V1z"/></svg> Generate
+              </button>
+            </div>
+            <button class="btn-icon btn-action-danger btn-remove-section" data-section="${sIdx}" ${this.composition.sections.length <= 1 ? 'disabled' : ''} title="Remove Section">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
           </div>
         </div>
         ${this._renderNotationTable(section, sIdx, taal)}
@@ -132,12 +191,24 @@ class NotationGrid {
         }))
         .filter(chunk => chunk.start < chunk.end);
 
-      html += `<div class="avartan-block">`;
+      html += `<div class="avartan-block" data-section="${sIdx}" data-avartan="${aIdx}">`;
       html += `
-        <div class="avartan-actions">
-            <button class="btn-row-action btn-duplicate-avartan" data-section="${sIdx}" data-avartan="${aIdx}"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg></button>
-            <button class="btn-row-action btn-clear-avartan" data-section="${sIdx}" data-avartan="${aIdx}"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.5 4V2.5h5V4M6.5 7v4M9.5 7v4M3.5 4l.7 9.3a1.5 1.5 0 001.5 1.2h4.6a1.5 1.5 0 001.5-1.2l.7-9.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="btn-row-action btn-remove-avartan" data-section="${sIdx}" data-avartan="${aIdx}" ${this.composition.sections[sIdx].avartans.length <= 1 ? 'disabled' : ''}><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        <div class="avartan-block-header">
+          <span class="avartan-label">Avartan ${aIdx + 1}</span>
+          <div class="avartan-actions">
+            <button class="btn-avartan-action btn-duplicate-avartan" data-section="${sIdx}" data-avartan="${aIdx}" title="Duplicate this avartan">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
+              <span>Duplicate</span>
+            </button>
+            <button class="btn-avartan-action btn-clear-avartan" data-section="${sIdx}" data-avartan="${aIdx}" title="Clear all bols">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.5 4V2.5h5V4M6.5 7v4M9.5 7v4M3.5 4l.7 9.3a1.5 1.5 0 001.5 1.2h4.6a1.5 1.5 0 001.5-1.2l.7-9.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Clear</span>
+            </button>
+            <button class="btn-avartan-action btn-avartan-action--danger btn-remove-avartan" data-section="${sIdx}" data-avartan="${aIdx}" ${this.composition.sections[sIdx].avartans.length <= 1 ? 'disabled' : ''} title="Remove this avartan">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span>Remove</span>
+            </button>
+          </div>
         </div>`;
 
       chunks.forEach((chunk, chunkIdx) => {
@@ -206,8 +277,15 @@ class NotationGrid {
           }
 
           const marker = getMarkerForMatra(taal, matraNum);
-          if (marker) html += `<td class="symbol-cell${vibClass}"><span class="marker-badge ${marker.type}">${marker.label}</span></td>`;
-          else html += `<td class="symbol-cell${vibClass}"></td>`;
+          if (marker) {
+            let legendHtml = '';
+            if (sIdx === 0 && aIdx === 0 && matraNum === 0 && chunk.start === 0) {
+              legendHtml = `<span class="marker-legend-tooltip" title="Markers:&#10;🟠 X = Sam (first beat)&#10;🟤 2,3 = Taali (clap)&#10;🟢 0 = Khali (wave)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>`;
+            }
+            html += `<td class="symbol-cell${vibClass}"><span class="marker-badge ${marker.type}">${marker.label}</span>${legendHtml}</td>`;
+          } else {
+            html += `<td class="symbol-cell${vibClass}"></td>`;
+          }
         }
         html += `</tr></tbody></table></div>`;
       });
@@ -286,8 +364,12 @@ class NotationGrid {
         const sIdx = parseInt(btn.dataset.section);
         const speedSelect = this.container.querySelector(`.fill-theka-speed[data-section="${sIdx}"]`);
 
-        const speedValue = speedSelect ? speedSelect.value : '1';
-        const speedName = speedSelect ? speedSelect.options[speedSelect.selectedIndex].text.split(' ')[0] : 'Layakari';
+        const speedValue = speedSelect ? speedSelect.value : '';
+        if (!speedValue) {
+          alert('Please select a Layakari speed to generate first.');
+          return;
+        }
+        const speedName = speedSelect.options[speedSelect.selectedIndex].text.split(' ')[0];
 
         const result = this.composition.generateLayakariSection(sIdx, speedValue, speedName);
         if (result === -1) {
@@ -340,26 +422,40 @@ class NotationGrid {
       });
     });
 
-    const addSectionBtn = this.container.querySelector('#btn-add-section');
-    if (addSectionBtn) {
-      addSectionBtn.addEventListener('click', () => {
+    const addSectionContainer = this.container.querySelector('#add-section-split-container');
+    if (addSectionContainer) {
+      const primaryBtn = addSectionContainer.querySelector('#btn-add-section-primary');
+      const dropdownBtn = addSectionContainer.querySelector('#btn-add-section-dropdown');
+      const menu = addSectionContainer.querySelector('#add-section-menu');
+
+      primaryBtn.addEventListener('click', () => {
         if (this.onAddSection) {
-          this.onAddSection();
-          return;
+          this.onAddSection(primaryBtn.dataset.type);
+        } else {
+          this.composition.addSection(primaryBtn.dataset.type, `Section ${this.composition.sections.length + 1}`);
+          this.render();
+          if (this.onCompositionChanged) this.onCompositionChanged();
         }
-        this.composition.addSection('custom', `Section ${this.composition.sections.length + 1}`);
-        this.render();
-        if (this.onCompositionChanged) this.onCompositionChanged();
+      });
+
+      dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('active');
+      });
+
+      addSectionContainer.querySelectorAll('.add-section-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          menu.classList.remove('active');
+          if (this.onAddSection) {
+            this.onAddSection(opt.dataset.type);
+          } else {
+            this.composition.addSection(opt.dataset.type, `Section ${this.composition.sections.length + 1}`);
+            this.render();
+            if (this.onCompositionChanged) this.onCompositionChanged();
+          }
+        });
       });
     }
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.matra-cell') && !e.target.closest('.bol-input-overlay')) {
-        this.bolInput.hide();
-        this.activeCell = null;
-        this.container.querySelectorAll('.cell-active').forEach(c => c.classList.remove('cell-active'));
-      }
-    });
   }
 
   _activateCell(sIdx, aIdx, mIdx, cellEl) {
@@ -367,6 +463,8 @@ class NotationGrid {
     cellEl.classList.add('cell-active');
     this.activeCell = { sectionIdx: sIdx, avartanIdx: aIdx, matraIdx: mIdx };
     this.bolInput.show(cellEl, sIdx, aIdx, mIdx, this.composition.getBol(sIdx, aIdx, mIdx));
+    // Notify the app to auto-target Quick Entry to this cell's section/avartan
+    if (this.onCellClicked) this.onCellClicked(sIdx, aIdx, mIdx);
   }
 
   _navigateFromActive(direction) {
