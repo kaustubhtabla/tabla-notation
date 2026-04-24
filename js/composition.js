@@ -259,113 +259,31 @@ class Composition {
     const sourceSection = this.sections[sectionIdx];
     if (!sourceSection || !taal) return;
 
-    this._saveUndoState();
-
-    let N = 1, D = 1;
-    if (typeof speed === 'string' && speed.includes('/')) {
-      const parts = speed.split('/');
-      N = parseInt(parts[0]);
-      D = parseInt(parts[1]);
-    } else {
-      N = parseInt(speed);
-      D = 1;
-    }
-
-    // Fractional layakaris are allowed for any section inside a Theka composition.
-    if (D !== 1 && this.compositionType !== 'theka') {
+    if (!window.LayakariCore || typeof window.LayakariCore.generateLayakariSectionData !== 'function') {
+      console.error('LayakariCore is unavailable.');
       return -1;
     }
 
-    // Extract raw matras linearly
-    let sourceMatras = [];
-    sourceSection.avartans.forEach(avartan => {
-      avartan.matras.forEach(matra => {
-        sourceMatras.push({ bols: [...(matra.bols || [])] });
+    try {
+      const newSection = window.LayakariCore.generateLayakariSectionData({
+        sourceSection,
+        taal,
+        compositionType: this.compositionType,
+        speed,
+        speedName
       });
-    });
 
-    // Check if section is completely empty, fallback exactly to taal.theka
-    const isEmpty = sourceMatras.every(m => m.bols.length === 0);
-    if (isEmpty) {
-      sourceMatras = taal.theka.map(b => ({ bols: [b] }));
-      // Pad to fill avartan strictly if theka is shorter than avartan (e.g. rare generic cases)
-      while (sourceMatras.length < taal.matras) sourceMatras.push({ bols: [] });
+      this._saveUndoState();
+      this.sections.splice(sectionIdx + 1, 0, newSection);
+      this._markUpdated();
+      return sectionIdx + 1;
+    } catch (err) {
+      if (err && err.code === 'fractional_non_theka') {
+        return -1;
+      }
+      console.error('Failed to generate layakari section:', err);
+      return -1;
     }
-
-    let resultMatras = [];
-
-    if (D === 1) {
-      // Repeat source matras N times
-      let repeatedMatras = [];
-      for (let n = 0; n < N; n++) {
-        sourceMatras.forEach(m => repeatedMatras.push({ bols: [...m.bols] }));
-      }
-
-      // Chunk back into mathematically correct groups by N
-      for (let i = 0; i < repeatedMatras.length; i += N) {
-        let chunkBols = [];
-        for (let j = 0; j < N; j++) {
-           if (i + j < repeatedMatras.length) {
-              const m = repeatedMatras[i + j];
-              // If empty matra, add a rest to represent the space proportionately
-              if (m.bols.length === 0) {
-                 chunkBols.push('S');
-              } else {
-                 chunkBols.push(...m.bols);
-              }
-           }
-        }
-        resultMatras.push({ bols: chunkBols });
-      }
-    } else {
-      // Existing math logic for fractions (Theka only)
-      let flatBols = [];
-      sourceMatras.forEach(m => {
-        if (m.bols.length === 0) flatBols.push('S');
-        else flatBols.push(...m.bols);
-      });
-      let numBolsNeeded = Math.ceil((taal.matras / D) * N);
-      while(flatBols.length < numBolsNeeded) flatBols.push(...flatBols);
-      flatBols = flatBols.slice(0, numBolsNeeded);
-
-      const totalSubBeats = taal.matras * N;
-      const subBeatsArray = new Array(totalSubBeats).fill('S');
-
-      for (let i = 0; i < flatBols.length; i++) {
-        const targetIndex = i * D;
-        if (targetIndex < totalSubBeats) {
-          subBeatsArray[targetIndex] = flatBols[i];
-        }
-      }
-
-      for (let i = 0; i < taal.matras; i++) {
-        const chunk = subBeatsArray.slice(i * N, (i + 1) * N);
-        resultMatras.push({ bols: chunk });
-      }
-    }
-
-    // Block into Avartans based on taal.matras
-    let newAvartans = [];
-    for (let i = 0; i < resultMatras.length; i += taal.matras) {
-      let chunk = resultMatras.slice(i, i + taal.matras);
-      while (chunk.length < taal.matras) {
-        chunk.push({ bols: [] });
-      }
-      newAvartans.push({ matras: chunk });
-    }
-
-    const cleanLabel = sourceSection.label.split(' (')[0]; // Strip old speed name if compounding
-    const newSection = {
-      type: sourceSection.type,
-      label: `${cleanLabel} (${speedName})`,
-      avartans: newAvartans
-    };
-
-    // Insert new section explicitly after the source section
-    this.sections.splice(sectionIdx + 1, 0, newSection);
-    
-    this._markUpdated();
-    return sectionIdx + 1;
   }
 
   applyQuickEntry(sectionIdx, avartanIdx, startMatraIdx, bolEntries) {

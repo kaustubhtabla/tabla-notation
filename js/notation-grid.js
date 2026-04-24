@@ -278,11 +278,7 @@ class NotationGrid {
 
           const marker = getMarkerForMatra(taal, matraNum);
           if (marker) {
-            let legendHtml = '';
-            if (sIdx === 0 && aIdx === 0 && matraNum === 0 && chunk.start === 0) {
-              legendHtml = `<span class="marker-legend-tooltip" title="Markers:&#10;🟠 X = Sam (first beat)&#10;🟤 2,3 = Taali (clap)&#10;🟢 0 = Khali (wave)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>`;
-            }
-            html += `<td class="symbol-cell${vibClass}"><span class="marker-badge ${marker.type}">${marker.label}</span>${legendHtml}</td>`;
+            html += `<td class="symbol-cell${vibClass}"><span class="marker-badge ${marker.type}">${marker.label}</span></td>`;
           } else {
             html += `<td class="symbol-cell${vibClass}"></td>`;
           }

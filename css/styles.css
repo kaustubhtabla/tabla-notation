@@ -287,6 +287,82 @@ body::before {
   margin-left: auto;
 }
 
+/* ─── Header Script Toggle ────────────────────────────────────────── */
+.header-script-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--grid-border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  user-select: none;
+}
+
+.header-script-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--grid-border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.header-script-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.header-script-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Header Sync Indicator ───────────────────────────────────────── */
+.header-sync-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--grid-border);
+  cursor: help;
+  transition: all var(--transition-normal);
+}
+
+.header-sync-indicator:hover {
+  background: var(--bg-elevated);
+  border-color: var(--grid-border-strong);
+}
+
+.header-sync-indicator .sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  position: relative;
+}
+
+.header-sync-indicator.syncing .sync-dot {
+  background: var(--info);
+  box-shadow: 0 0 8px var(--info);
+  animation: syncPulse 1.5s infinite ease-in-out;
+}
+
+.header-sync-indicator.connected .sync-dot {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.header-sync-indicator.disconnected .sync-dot {
+  background: var(--text-muted);
+  box-shadow: none;
+}
+
 /* ─── Sync Status Indicator ───────────────────────────────────────── */
 .sync-status {
   display: flex;
@@ -497,6 +573,84 @@ body::before {
   margin: 6px 0;
 }
 
+/* ─── Menu Toggle Items (Theme / Script) ──────────────────────────── */
+.menu-item.menu-item-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.menu-item.menu-item-toggle:hover {
+  background: var(--bg-elevated);
+  color: var(--accent-primary);
+}
+
+.menu-item-value {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-xs);
+  transition: all var(--transition-fast);
+}
+
+.menu-item.menu-item-toggle:hover .menu-item-value {
+  background: rgba(212, 148, 58, 0.15);
+}
+
+/* ─── In-Menu Sync Status ─────────────────────────────────────────── */
+.menu-item.menu-item-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: default;
+  letter-spacing: 0.02em;
+}
+
+.menu-item-status .sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-sam);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.menu-item-status.syncing .sync-dot {
+  background: var(--info);
+  box-shadow: 0 0 8px var(--info);
+  animation: syncPulse 1.5s infinite ease-in-out;
+}
+
+.menu-item-status.connected .sync-dot {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.menu-item-status.disconnected .sync-dot {
+  background: var(--text-muted);
+  box-shadow: none;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════
    SCRIPT TOGGLE SWITCH
@@ -575,30 +729,53 @@ body::before {
 
 /* ─── Info Toggle Button ───────────────────────────────────────────── */
 .btn-info-toggle {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1.5px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--grid-border);
   color: var(--accent-primary);
-  background: transparent;
+  background: var(--bg-tertiary);
   cursor: pointer;
   transition: all var(--transition-normal);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .btn-info-toggle:hover {
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  box-shadow: var(--shadow-glow);
-  transform: scale(1.08);
+  background: var(--bg-elevated);
+  border-color: var(--grid-border-strong);
+  color: var(--goldAccent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-info-toggle:hover svg circle,
+.btn-info-toggle.active svg circle {
+  fill: currentColor;
+}
+
+.btn-info-toggle:hover svg line,
+.btn-info-toggle.active svg line {
+  stroke: var(--bg-primary);
 }
 
 .btn-info-toggle.active {
-  background: var(--accent-primary);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-taali));
   color: var(--text-inverse);
+  border-color: var(--accent-primary);
   box-shadow: var(--shadow-glow);
+}
+
+.btn-info-toggle.active span {
+  color: var(--text-inverse);
+}
+
+.btn-info-toggle.active svg line,
+.btn-info-toggle.active svg circle {
+  stroke: var(--text-inverse);
 }
 
 /* ─── Sidebar Overlay (Backdrop) ───────────────────────────────────── */
@@ -924,7 +1101,7 @@ body::before {
 
 .quick-entry-input {
   flex: 1;
-  padding: 7px 10px;
+  padding: 5px 12px;
   background: var(--bg-tertiary);
   border: 1px solid var(--grid-border);
   border-radius: var(--radius-sm);
@@ -933,6 +1110,8 @@ body::before {
   font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
   outline: none;
   transition: border-color var(--transition-fast);
+  height: 32px;
+  box-sizing: border-box;
 }
 
 .quick-entry-input:focus {
@@ -945,16 +1124,20 @@ body::before {
 }
 
 .quick-entry-select {
-  padding: 7px 10px;
-  background: var(--bg-tertiary);
+  padding: 5px 32px 5px 12px;
+  background: var(--bg-tertiary) url('data:image/svg+xml;utf8,<svg fill="none" stroke="%238b7d6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
+  background-size: 14px;
   border: 1px solid var(--grid-border);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-family: inherit;
   outline: none;
   cursor: pointer;
-  min-width: 110px;
+  min-width: 90px;
+  appearance: none;
+  height: 32px;
+  box-sizing: border-box;
 }
 
 .quick-entry-hint {
@@ -1030,7 +1213,8 @@ body::before {
 }
 
 .layakari-generator-group select {
-  flex: 1;
+  box-sizing: border-box;
+  flex: 0 0 50%;
   width: 50%;
   border: none;
   background: transparent url('data:image/svg+xml;utf8,<svg fill="none" stroke="%238b7d6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 6px center;
@@ -1043,10 +1227,13 @@ body::before {
   cursor: pointer;
   color: var(--text-primary);
   appearance: none;
+  text-align: center;
+  text-align-last: center;
 }
 
 .btn-generate-layakari {
-  flex: 1;
+  box-sizing: border-box;
+  flex: 0 0 50%;
   width: 50%;
   justify-content: center;
   display: inline-flex;
@@ -1169,7 +1356,7 @@ body::before {
   border-bottom: 2px solid var(--grid-border-strong);
   background: var(--bg-tertiary);
   position: relative;
-  text-align: left;
+  text-align: center;
 }
 
 .markers-row th.vibhaag-start {
@@ -1238,13 +1425,13 @@ body::before {
 }
 
 .matra-cell {
-  padding: 6px 5px;
+  padding: 8px 5px;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
-  min-height: 40px;
+  height: 44px;
   font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
   font-size: 1.0rem !important;
   font-weight: 500;
@@ -1280,7 +1467,7 @@ body::before {
 
 .symbol-cell {
   padding: 3px 4px;
-  text-align: left;
+  text-align: center;
   vertical-align: middle;
   height: 26px;
 }
@@ -1458,7 +1645,6 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
   max-width: 100%;
   overflow: visible;
 }
@@ -2142,12 +2328,12 @@ body::before {
 }
 
 .dash-select {
-  background: var(--bg-tertiary) url('data:image/svg+xml;utf8,<svg fill="none" stroke="%238b7d6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
+  background: var(--bg-tertiary) url('data:image/svg+xml;utf8,<svg fill="none" stroke="%238b7d6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 24px center;
   background-size: 16px;
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   border-radius: 8px;
-  padding: 10px 36px 10px 14px;
+  padding: 10px 56px 10px 20px;
   font-size: 1rem;
   width: 100%;
   appearance: none;
@@ -2274,7 +2460,8 @@ body::before {
 
 /* ─── Composition Library Section ──────────────────────────────────── */
 .dash-library-section {
-  padding: 0 40px 32px;
+  display: flex;
+  flex-direction: column;
 }
 
 .dash-library-header {

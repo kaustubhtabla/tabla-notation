@@ -7,7 +7,9 @@
   <meta name="description"
     content="Open the Bhatkhande.io workspace to compose, edit, and export Indian classical Tabla notation in Bhatkhande format.">
   <title>Bhatkhande.io — Workspace</title>
-  <link rel="stylesheet" href="css/styles.css?v=200">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#faf8f4">
+  <link rel="stylesheet" href="css/styles.css?v=212">
   <style>
     .matra-cell, .grouped-bol {
       font-size: 1.0rem !important;
@@ -146,6 +148,27 @@
               </svg>
               Workspace Hub
             </button>
+            <div class="menu-separator"></div>
+            <div class="menu-item menu-item-toggle" id="menu-theme-toggle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <span>Theme</span>
+              <span class="menu-item-value" id="menu-theme-label">Auto</span>
+            </div>
+            <div class="menu-item menu-item-toggle" id="menu-script-toggle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 21V4a2 2 0 012-2h12a2 2 0 012 2v17"></path>
+                <path d="M9 7h6M9 11h4"></path>
+              </svg>
+              <span>Script</span>
+              <span class="menu-item-value" id="menu-script-label">English</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item menu-item-status" id="menu-sync-status">
+              <div class="sync-dot"></div>
+              <span id="menu-sync-label">Syncing...</span>
+            </div>
           </div>
         </div>
 
@@ -153,38 +176,22 @@
       </div>
 
       <div class="header-right">
-        <button class="btn-icon btn-info-toggle" id="btn-toggle-sidebar" title="Composition Details">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
+        <button class="header-script-btn" id="header-script-toggle" title="Toggle script language">
+          <span class="header-script-label" id="header-script-label">EN</span>
         </button>
-        <div class="toolbar-separator"></div>
-        <div class="sync-status" id="sync-status" title="Checking connectivity...">
+
+        <div class="header-sync-indicator" id="header-sync-status" title="Sync status">
           <div class="sync-dot"></div>
-          <span class="sync-label">Syncing...</span>
         </div>
-        <div class="toolbar-separator"></div>
-        <button class="btn-icon" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
-          <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+
+        <button class="btn btn-info-toggle" id="btn-toggle-sidebar" title="Composition Details">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="11"></line>
+            <line x1="12" y1="7.5" x2="12.01" y2="7.5" stroke-width="3"></line>
           </svg>
-          <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg id="icon-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
+          <span>Composition Details</span>
         </button>
-        <div class="toolbar-separator"></div>
-        <div class="script-toggle-wrapper">
-          <span class="script-toggle-label" id="script-label">English</span>
-          <label class="toggle-switch" title="Toggle English / Hindi">
-            <input type="checkbox" id="script-toggle">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
       </div>
     </header>
 
@@ -304,18 +311,18 @@
           </div>
         </div>
 
-      </div>
+        <div class="dash-panel dash-library-section">
+          <div class="dash-library-header">
+            <h2 class="dash-panel-title">📚 Composition Library</h2>
+            <select id="dash-library-filter" class="dash-select dash-library-filter">
+              <option value="all">All Taals</option>
+            </select>
+          </div>
+          <div id="dash-library-grid" class="dash-library-grid">
+            <div class="dash-empty">Loading library...</div>
+          </div>
+        </div>
 
-      <div class="dash-library-section">
-        <div class="dash-library-header">
-          <h2 class="dash-panel-title">📚 Composition Library</h2>
-          <select id="dash-library-filter" class="dash-select dash-library-filter">
-            <option value="all">All Taals</option>
-          </select>
-        </div>
-        <div id="dash-library-grid" class="dash-library-grid">
-          <div class="dash-empty">Loading library...</div>
-        </div>
       </div>
 
       <button id="btn-dash-close" class="dash-close-btn" title="Close Workspace Hub">
@@ -336,14 +343,24 @@
     </div>
   </div>
 
-  <script src="js/taal-data.js?v=200"></script>
-  <script src="js/bol-input.js?v=200"></script>
-  <script src="js/composition.js?v=200"></script>
-  <script src="js/notation-grid.js?v=200"></script>
-  <script src="js/pdf-import.js?v=200"></script>
-  <script src="js/pdf-export.js?v=200"></script>
-  <script src="js/app.js?v=200"></script>
+  <script src="js/taal-data.js?v=203"></script>
+  <script src="js/layakari-core.js?v=3"></script>
+  <script src="js/bol-input.js?v=203"></script>
+  <script src="js/composition.js?v=204"></script>
+  <script src="js/notation-grid.js?v=203"></script>
+  <script src="js/pdf-import.js?v=203"></script>
+  <script src="js/pdf-export.js?v=203"></script>
+  <script src="js/library-data.js?v=1"></script>
+  <script src="js/app.js?v=205"></script>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.warn('SW registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
-
 </html>

@@ -7,6 +7,8 @@
   <meta name="description"
     content="Bhatkhande.io helps Tabla students and teachers create, organize, and export Bhatkhande notation with ease.">
   <title>Bhatkhande.io — Tabla Notation Workspace</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#faf8f4">
   <script>
     (() => {
       try {
@@ -378,6 +380,14 @@
       });
     });
   </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.warn('SW registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
-
 </html>

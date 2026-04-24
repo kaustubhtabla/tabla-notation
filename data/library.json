@@ -4577,5 +4577,1935 @@
         ]
       }
     ]
+  },
+  {
+    "id": "lib_mob705yl_l40ori",
+    "title": "Te Tay Kayda DELHI",
+    "taalId": "teentaal",
+    "compositionType": "kayda",
+    "laya": "madhya",
+    "gharana": "Delhi",
+    "guru": "",
+    "notes": "",
+    "sections": [
+      {
+        "type": "mukh",
+        "label": "Main",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Ti"
+                ]
+              },
+              {
+                "bols": [
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "Ki"
+                ]
+              },
+              {
+                "bols": [
+                  "Na"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "Ta"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Ta"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Dhi"
+                ]
+              },
+              {
+                "bols": [
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "GI"
+                ]
+              },
+              {
+                "bols": [
+                  "Na"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "mukh",
+        "label": "Main (Dugun)",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "Dha",
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Ti",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "Ki",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "Ta",
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay",
+                  "Ta"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Dhi",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "GI",
+                  "Na"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "Dha",
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Ti",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "Ki",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "Ta",
+                  "Te"
+                ]
+              },
+              {
+                "bols": [
+                  "Tay",
+                  "Ta"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Dha"
+                ]
+              },
+              {
+                "bols": [
+                  "Te",
+                  "Tay"
+                ]
+              },
+              {
+                "bols": [
+                  "Dha",
+                  "Ge"
+                ]
+              },
+              {
+                "bols": [
+                  "Dhi",
+                  "Na"
+                ]
+              },
+              {
+                "bols": [
+                  "GI",
+                  "Na"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 1",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 2",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 3",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 4",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 5",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "STA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 6",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "DHATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TATE"
+                ]
+              },
+              {
+                "bols": [
+                  "TAYTA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "STA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "TATA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 7",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "SDHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHADHA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Palta 8",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "DHINA"
+                ]
+              },
+              {
+                "bols": [
+                  "Gina"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "palta",
+        "label": "Tihai",
+        "avartans": [
+          {
+            "matras": [
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "TETAY"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAS"
+                ]
+              },
+              {
+                "bols": [
+                  "SS"
+                ]
+              },
+              {
+                "bols": [
+                  "DHAGE"
+                ]
+              },
+              {
+                "bols": [
+                  "TINA"
+                ]
+              },
+              {
+                "bols": [
+                  "KINA"
+                ]
+              }
+            ]
+          },
+          {
+            "matras": [
+              {
+                "bols": [
+                  "Dha"
+                ]
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              },
+              {
+                "bols": []
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "createdAt": "2026-04-23T08:01:19.149Z",
+    "updatedAt": "2026-04-23T08:17:43.302Z"
   }
 ]

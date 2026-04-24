@@ -265,24 +265,33 @@ const bhatkhande = {
   }
 
   _updateSyncStatus(status) {
-    const el = document.getElementById('sync-status');
-    if (!el) return;
+    // Update in-menu sync status
+    const menuEl = document.getElementById('menu-sync-status');
+    const menuLabel = document.getElementById('menu-sync-label');
+    const menuDot = menuEl?.querySelector('.sync-dot');
     
-    el.classList.remove('syncing', 'connected', 'disconnected');
-    el.classList.add(status);
+    if (menuEl) {
+      menuEl.classList.remove('syncing', 'connected', 'disconnected');
+      menuEl.classList.add(status);
+    }
     
-    const label = el.querySelector('.sync-label');
-    if (label) {
+    if (menuLabel) {
       if (status === 'syncing') {
-        label.textContent = 'Syncing...';
-        el.title = 'Checking connection to sync server...';
+        menuLabel.textContent = 'Syncing...';
       } else if (status === 'connected') {
-        label.textContent = 'Cloud Sync';
-        el.title = 'Connected to sync server. Compositions are synced to the cloud.';
+        menuLabel.textContent = 'Cloud Sync Active';
       } else {
-        label.textContent = 'Local Only';
-        el.title = 'Sync server unavailable. Compositions are saved to your browser only.';
+        menuLabel.textContent = 'Local Only';
       }
+    }
+
+    // Update header-level sync indicator
+    const headerSyncEl = document.getElementById('header-sync-status');
+    if (headerSyncEl) {
+      headerSyncEl.classList.remove('syncing', 'connected', 'disconnected');
+      headerSyncEl.classList.add(status);
+      const titleMap = { syncing: 'Syncing...', connected: 'Cloud Sync Active', disconnected: 'Local Only' };
+      headerSyncEl.title = titleMap[status] || 'Sync status';
     }
   }
 
@@ -323,47 +332,30 @@ const bhatkhande = {
     if (this.composition.compositionType !== 'theka') return;
     if (!confirm('This will replace all current sections with a complete set of Layakaris. Do you want to continue?')) return;
 
-    this.composition._saveUndoState();
-    this.composition.sections = [];
+    if (!window.LayakariCore || typeof window.LayakariCore.generateAllLayakariSectionsData !== 'function') {
+      this._showToast('Layakari engine unavailable in this build.', 'error');
+      return;
+    }
 
-    const speeds = [
-      { val: '2', name: 'Dugun (2x)', type: 'palta' },
-      { val: '3', name: 'Tigun (3x)', type: 'palta' },
-      { val: '4', name: 'Chaugun (4x)', type: 'palta' },
-      { val: '3/2', name: 'Aad (3/2)', type: 'palta' },
-      { val: '5/4', name: 'Kuad (5/4)', type: 'palta' },
-      { val: '7/4', name: 'Biyad (7/4)', type: 'palta' }
-    ];
+    try {
+      const generatedSections = window.LayakariCore.generateAllLayakariSectionsData(this.composition.toJSON());
+      this.composition._saveUndoState();
+      this.composition.sections = generatedSections;
+      this.composition._markUpdated();
 
-    const thekaSection = typeof getDefaultSectionBlueprintForCompositionType === 'function'
-      ? getDefaultSectionBlueprintForCompositionType('theka')
-      : { type: 'custom', label: 'Theka' };
-    this.composition.addSection(thekaSection.type, 'Theka (Thah)');
-    
-    // Explicitly seed the Thah section with the Theka bols
-    const taal = this.composition.getTaal();
-    const thahMatras = taal.theka.map(b => ({ bols: [b] }));
-    while (thahMatras.length < taal.matras) thahMatras.push({ bols: [] });
-    this.composition.sections[0].avartans[0].matras = thahMatras;
-    
-    // Reverse the array so that calling multiple times on index 0 appends them in correct visual order
-    speeds.slice().reverse().forEach(speed => {
-      this.composition.generateLayakariSection(0, speed.val, speed.name);
-    });
-
-    this.notationGrid.render();
-    this._updateMetadataPanel();
-    this._onCompositionChanged();
-    this._showToast('Complete Layakari set generated successfully!', 'success');
+      this.notationGrid.render();
+      this._updateMetadataPanel();
+      this._onCompositionChanged();
+      this._showToast('Complete Layakari set generated successfully!', 'success');
+    } catch (err) {
+      console.error('Failed to generate all layakaris:', err);
+      this._showToast(err?.message || 'Could not generate layakaris.', 'error');
+    }
   }
 
   _initTheme() {
-    const toggleBtn = document.getElementById('btn-theme-toggle');
-    if (!toggleBtn) return;
-
-    const sunIcon = document.getElementById('icon-sun');
-    const moonIcon = document.getElementById('icon-moon');
-    const autoIcon = document.getElementById('icon-auto');
+    const menuThemeItem = document.getElementById('menu-theme-toggle');
+    const menuThemeLabel = document.getElementById('menu-theme-label');
 
     const toggleTheme = (themeStr) => {
       let actualTheme = themeStr;
@@ -378,24 +370,26 @@ const bhatkhande = {
       document.documentElement.setAttribute('data-theme', actualTheme);
       document.documentElement.setAttribute('data-theme-setting', themeStr);
       
-      if (sunIcon) sunIcon.style.display = themeStr === 'dark' ? 'block' : 'none';
-      if (moonIcon) moonIcon.style.display = themeStr === 'light' ? 'block' : 'none';
-      if (autoIcon) autoIcon.style.display = themeStr === 'auto' ? 'block' : 'none';
-      toggleBtn.title = `Theme: ${themeStr.charAt(0).toUpperCase() + themeStr.slice(1)} (Click to toggle)`;
+      if (menuThemeLabel) {
+        menuThemeLabel.textContent = themeStr.charAt(0).toUpperCase() + themeStr.slice(1);
+      }
     };
 
     const savedTheme = localStorage.getItem('bhatkhande_io_theme') || 'auto';
     toggleTheme(savedTheme);
 
-    toggleBtn.addEventListener('click', () => {
-      const currentSetting = document.documentElement.getAttribute('data-theme-setting') || 'auto';
-      let nextSetting = 'auto';
-      if (currentSetting === 'auto') nextSetting = 'dark';
-      else if (currentSetting === 'dark') nextSetting = 'light';
-      else if (currentSetting === 'light') nextSetting = 'auto';
-      toggleTheme(nextSetting);
-      this._showToast(`Theme changed to ${nextSetting.charAt(0).toUpperCase() + nextSetting.slice(1)}`);
-    });
+    if (menuThemeItem) {
+      menuThemeItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentSetting = document.documentElement.getAttribute('data-theme-setting') || 'auto';
+        let nextSetting = 'auto';
+        if (currentSetting === 'auto') nextSetting = 'dark';
+        else if (currentSetting === 'dark') nextSetting = 'light';
+        else if (currentSetting === 'light') nextSetting = 'auto';
+        toggleTheme(nextSetting);
+        this._showToast(`Theme: ${nextSetting.charAt(0).toUpperCase() + nextSetting.slice(1)}`);
+      });
+    }
 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
       if (!localStorage.getItem('bhatkhande_io_theme')) {
@@ -457,15 +451,32 @@ const bhatkhande = {
       });
     }
 
-    const scriptToggle = document.getElementById('script-toggle');
-    if (scriptToggle) {
-      scriptToggle.addEventListener('change', (e) => {
-	        this.currentScript = e.target.checked ? 'devanagari' : 'roman';
-	        this.notationGrid.setScript(this.currentScript);
-	        const label = document.getElementById('script-label');
-	        if (label) label.textContent = this.currentScript === 'devanagari' ? 'Hindi' : 'English';
-	      });
-	    }
+    // Script toggle helper
+    const toggleScript = () => {
+      this.currentScript = this.currentScript === 'roman' ? 'devanagari' : 'roman';
+      this.notationGrid.setScript(this.currentScript);
+      const isHindi = this.currentScript === 'devanagari';
+      const menuLabel = document.getElementById('menu-script-label');
+      if (menuLabel) menuLabel.textContent = isHindi ? 'Hindi' : 'English';
+      const headerLabel = document.getElementById('header-script-label');
+      if (headerLabel) headerLabel.textContent = isHindi ? 'HI' : 'EN';
+      this._showToast(`Script: ${isHindi ? 'Hindi (Devanagari)' : 'English (Roman)'}`);
+    };
+
+    // Script toggle (via overflow menu)
+    const menuScriptItem = document.getElementById('menu-script-toggle');
+    if (menuScriptItem) {
+      menuScriptItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleScript();
+      });
+    }
+
+    // Script toggle (via header button)
+    const headerScriptBtn = document.getElementById('header-script-toggle');
+    if (headerScriptBtn) {
+      headerScriptBtn.addEventListener('click', () => toggleScript());
+    }
 
     document.getElementById('btn-home')?.addEventListener('click', () => {
       this._openDashboard();
@@ -957,8 +968,51 @@ const bhatkhande = {
     this._populateLibraryPanel();
   }
 
+  _normalizeLibraryEntries(rawLibrary) {
+    if (!Array.isArray(rawLibrary)) return [];
+
+    return rawLibrary
+      .filter(entry => entry && typeof entry === 'object')
+      .map(entry => {
+        const normalizedType = typeof normalizeCompositionTypeId === 'function'
+          ? normalizeCompositionTypeId(entry.compositionType || 'custom')
+          : (entry.compositionType || 'custom');
+
+        return {
+          id: String(entry.id || '').trim(),
+          title: String(entry.title || 'Untitled Composition').trim() || 'Untitled Composition',
+          taalId: String(entry.taalId || '').trim(),
+          compositionType: normalizedType,
+          laya: String(entry.laya || 'madhya').trim() || 'madhya',
+          gharana: String(entry.gharana || ''),
+          guru: String(entry.guru || ''),
+          notes: String(entry.notes || ''),
+          sections: Array.isArray(entry.sections) ? entry.sections : []
+        };
+      })
+      .filter(entry => entry.id && entry.taalId);
+  }
+
+  _cacheLibraryEntries(rawLibrary) {
+    const normalizedLibrary = this._normalizeLibraryEntries(rawLibrary);
+    if (normalizedLibrary.length > 0) {
+      this._libraryCache = normalizedLibrary;
+    }
+    return normalizedLibrary;
+  }
+
+  _getEmbeddedLibraryEntries() {
+    return this._normalizeLibraryEntries(window.BHATKHANDE_LIBRARY_DATA);
+  }
+
   async _fetchLibrary() {
     if (this._libraryCache) return this._libraryCache;
+
+    const embeddedLibrary = this._getEmbeddedLibraryEntries();
+    if (window.location.protocol === 'file:' && embeddedLibrary.length > 0) {
+      this._libraryCache = embeddedLibrary;
+      return this._libraryCache;
+    }
 
     // Try API endpoint first (local sync server)
     try {
@@ -967,31 +1021,34 @@ const bhatkhande = {
       const response = await fetch('/api/library', { signal: controller.signal });
       clearTimeout(timeoutId);
       if (response.ok) {
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
+        try {
           const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            this._libraryCache = data;
+          if (this._cacheLibraryEntries(data).length > 0) {
             return this._libraryCache;
           }
-        }
+        } catch (_) { /* fall through to static fallback */ }
       }
     } catch (_) { /* fall through to static fallback */ }
 
-    // Static JSON fallback (GitHub Pages, file://, or server unavailable)
+    // Static JSON fallback (GitHub Pages or server unavailable)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const response = await fetch('data/library.json', { signal: controller.signal });
+      const libraryUrl = new URL('data/library.json', window.location.href);
+      const response = await fetch(libraryUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (response.ok) {
         const data = await response.json();
-        if (Array.isArray(data)) {
-          this._libraryCache = data;
+        if (this._cacheLibraryEntries(data).length > 0) {
           return this._libraryCache;
         }
       }
     } catch (_) { /* fall through */ }
+
+    if (embeddedLibrary.length > 0) {
+      this._libraryCache = embeddedLibrary;
+      return this._libraryCache;
+    }
 
     return [];
   }

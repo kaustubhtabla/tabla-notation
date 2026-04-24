@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Generate a full layakari set from a tabla composition using the extracted bhatkhande.io layakari engine.">
+  <title>Bhatkhande.io — Layakari Studio</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#faf8f4">
+  <link rel="stylesheet" href="css/styles.css?v=212">
+  <link rel="stylesheet" href="css/layakari.css?v=4">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪘</text></svg>">
+</head>
+<body>
+  <div class="layakari-shell">
+
+    <!-- Slim header bar -->
+    <header class="lk-header">
+      <div class="lk-header-left">
+        <a href="index.html" class="lk-brand">bhatkhande.io</a>
+        <span class="lk-header-sep">/</span>
+        <h1 class="lk-title">Layakari Studio</h1>
+      </div>
+      <div class="lk-header-right">
+        <select id="layakari-script-select" class="lk-inline-select" title="Preview script">
+          <option value="roman">EN</option>
+          <option value="devanagari">हि</option>
+        </select>
+        <a href="app.html" class="btn btn-sm">Open Editor</a>
+      </div>
+    </header>
+
+    <!-- Compact toolbar -->
+    <div class="lk-toolbar">
+      <div class="lk-toolbar-group">
+        <select id="layakari-template-taal" class="form-select lk-toolbar-select"></select>
+        <button id="btn-layakari-template" class="btn btn-primary btn-sm">Apply</button>
+      </div>
+
+      <div class="lk-toolbar-sep"></div>
+
+      <div class="lk-toolbar-group lk-toolbar-actions">
+        <button id="btn-generate-full-set" class="btn btn-primary btn-sm" disabled>Generate All Layakaris</button>
+        <button id="btn-export-pdf" class="btn btn-sm" disabled>Export PDF</button>
+        <button id="btn-download-layakari" class="btn btn-sm" disabled>Download JSON</button>
+      </div>
+    </div>
+
+    <!-- Status + summary strip -->
+    <div class="lk-info-strip">
+      <div class="lk-status" id="layakari-status">Create a theka template or load a composition to begin.</div>
+      <div class="lk-meta-pills">
+        <span class="lk-pill" id="layakari-source-pill" title="Source composition">No source</span>
+        <span class="lk-pill lk-pill-output" id="layakari-output-pill" title="Generated output">—</span>
+      </div>
+    </div>
+
+    <!-- Main content area — full width -->
+    <main class="lk-main">
+      <section class="lk-preview-area">
+        <div class="layakari-empty-state" id="layakari-empty-state">
+          Generate a result to preview the full layakari set here.
+        </div>
+        <div id="layakari-preview" class="preview-readonly"></div>
+      </section>
+    </main>
+
+    <!-- Floating explain trigger button -->
+    <button class="lk-explain-fab" id="btn-explain-toggle" title="Explain This Layakari" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+      </svg>
+      <span class="lk-fab-label">Explain</span>
+    </button>
+
+    <!-- Explain sidebar overlay -->
+    <div class="lk-explain-overlay" id="lk-explain-overlay"></div>
+    <aside class="lk-explain-drawer" id="lk-explain-drawer">
+      <div class="lk-drawer-header">
+        <h2 class="lk-drawer-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+          Explain This Layakari
+        </h2>
+        <button class="lk-drawer-close" id="btn-explain-close" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="lk-drawer-body">
+        <div class="layakari-explain-empty" id="layakari-explain-empty">
+          Generate a result to see writing logic here.
+        </div>
+        <div class="layakari-explain-content" id="layakari-explain-content" hidden>
+          <div class="layakari-explain-selector" id="layakari-explain-selector"></div>
+          <div class="layakari-explain-card" id="layakari-explain-card"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Support note collapsed into a small footer hint -->
+    <div class="lk-footer-hint" id="layakari-support-note">
+      Currently supports full-set layakari for Theka compositions. The first loaded section is used as the thah reference.
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/taal-data.js?v=203"></script>
+  <script src="js/layakari-core.js?v=3"></script>
+  <script src="js/composition.js?v=204"></script>
+  <script src="js/notation-grid.js?v=203"></script>
+  <script src="js/pdf-import.js?v=203"></script>
+  <script src="js/pdf-export.js?v=203"></script>
+  <script src="js/layakari-app.js?v=3"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.warn('SW registration failed: ', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
