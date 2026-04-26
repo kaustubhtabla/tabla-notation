@@ -59,6 +59,8 @@ const bhatkhande = {
       this._initTheme();
       this._initDashboard();
       this._initLibrary();
+      this._initSettingsModal();
+      this._initDraggablePalette();
       this._populateDropdowns();
       this._setupLayakariGenerator();
 
@@ -395,6 +397,165 @@ const bhatkhande = {
       if (!localStorage.getItem('bhatkhande_io_theme')) {
          toggleTheme('auto');
       }
+    });
+  }
+
+  _initSettingsModal() {
+    const btnSettings = document.getElementById('btn-settings');
+    const modal = document.getElementById('settings-overlay');
+    const btnClose = document.getElementById('btn-settings-close');
+    const overflowMenu = document.getElementById('toolbar-overflow-menu');
+
+    if (btnSettings && modal) {
+      btnSettings.addEventListener('click', () => {
+        modal.classList.add('active');
+        if (overflowMenu) overflowMenu.classList.remove('active');
+      });
+    }
+
+    if (btnClose && modal) {
+      btnClose.addEventListener('click', () => modal.classList.remove('active'));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    }
+
+    // Theme Setting
+    const themeSelect = document.getElementById('setting-theme');
+    if (themeSelect) {
+      themeSelect.value = document.documentElement.getAttribute('data-theme-setting') || 'auto';
+      themeSelect.addEventListener('change', (e) => {
+        let themeStr = e.target.value;
+        let actualTheme = themeStr;
+        if (themeStr === 'auto') {
+          actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          localStorage.removeItem('bhatkhande_io_theme');
+        } else {
+          localStorage.setItem('bhatkhande_io_theme', themeStr);
+        }
+        document.documentElement.setAttribute('data-theme', actualTheme);
+        document.documentElement.setAttribute('data-theme-setting', themeStr);
+      });
+    }
+
+    // Script Setting
+    const scriptSelect = document.getElementById('setting-script');
+    if (scriptSelect) {
+      const savedScript = localStorage.getItem('bhatkhande_io_script') || 'roman';
+      this.currentScript = savedScript;
+      scriptSelect.value = savedScript;
+      
+      scriptSelect.addEventListener('change', (e) => {
+        this.currentScript = e.target.value;
+        localStorage.setItem('bhatkhande_io_script', this.currentScript);
+        if (this.notationGrid) this.notationGrid.setScript(this.currentScript);
+        
+        const isHindi = this.currentScript === 'devanagari';
+        const headerLabel = document.getElementById('header-script-label');
+        if (headerLabel) headerLabel.textContent = isHindi ? 'HI' : 'EN';
+      });
+    }
+    
+    // Initial Script Setup
+    const isHindi = this.currentScript === 'devanagari';
+    const headerLabel = document.getElementById('header-script-label');
+    if (headerLabel) headerLabel.textContent = isHindi ? 'HI' : 'EN';
+  }
+
+  _initDraggablePalette() {
+    const bar = document.getElementById('quick-entry-bar');
+    const handle = document.getElementById('qe-drag-handle');
+    const toggle = document.getElementById('setting-draggable-palette');
+    
+    if (!bar || !handle || !toggle) return;
+
+    // Load saved preference
+    const isDraggable = localStorage.getItem('bhatkhande_io_draggable_palette') !== 'false';
+    toggle.checked = isDraggable;
+    
+    let isDragging = false;
+    let startX, startY, initialLeft, initialBottom;
+    let currentLeft = localStorage.getItem('bhatkhande_io_qe_left');
+    let currentBottom = localStorage.getItem('bhatkhande_io_qe_bottom');
+
+    const updateDraggableState = () => {
+      if (toggle.checked) {
+        bar.classList.add('draggable');
+        handle.style.display = 'flex';
+        if (currentLeft) bar.style.left = currentLeft;
+        if (currentBottom) bar.style.bottom = currentBottom;
+        if (currentLeft) bar.style.transform = 'none';
+      } else {
+        bar.classList.remove('draggable');
+        handle.style.display = 'none';
+        bar.style.left = '50%';
+        bar.style.bottom = '24px';
+        bar.style.transform = 'translateX(-50%)';
+        localStorage.removeItem('bhatkhande_io_qe_left');
+        localStorage.removeItem('bhatkhande_io_qe_bottom');
+      }
+    };
+
+    toggle.addEventListener('change', (e) => {
+      localStorage.setItem('bhatkhande_io_draggable_palette', e.target.checked);
+      updateDraggableState();
+    });
+
+    updateDraggableState();
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+      
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      
+      // Calculate new position
+      let newLeft = initialLeft + dx;
+      let newBottom = initialBottom - dy;
+      
+      // Boundary checks
+      const rect = bar.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width / 2;
+      const minX = rect.width / 2;
+      const maxBottom = window.innerHeight - rect.height - 24;
+      const minBottom = 24;
+      
+      newLeft = Math.max(minX, Math.min(newLeft, maxX));
+      newBottom = Math.max(minBottom, Math.min(newBottom, maxBottom));
+      
+      currentLeft = newLeft + 'px';
+      currentBottom = newBottom + 'px';
+      
+      bar.style.left = currentLeft;
+      bar.style.bottom = currentBottom;
+      bar.style.transform = 'translate(-50%, 0)'; // Keep centering offset
+    };
+
+    const onMouseUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      bar.classList.remove('is-dragging');
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      
+      localStorage.setItem('bhatkhande_io_qe_left', bar.style.left);
+      localStorage.setItem('bhatkhande_io_qe_bottom', bar.style.bottom);
+    };
+
+    handle.addEventListener('mousedown', (e) => {
+      if (!toggle.checked) return;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      const rect = bar.getBoundingClientRect();
+      // Calculate center-based left
+      initialLeft = rect.left + rect.width / 2;
+      initialBottom = window.innerHeight - rect.bottom;
+      
+      bar.classList.add('is-dragging');
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
     });
   }
 

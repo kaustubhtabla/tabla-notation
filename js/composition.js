@@ -224,8 +224,11 @@ class Composition {
     return avartan.matras.slice(1).every(matra => this._getMeaningfulBols(matra).length === 0);
   }
 
-  getRenderedMatraCount(sectionIdx, avartanIdx) {
+  getRenderedMatraCount(sectionIdx, avartanIdx, forceFull = false) {
     const taal = this.getTaal();
+    if (!taal) return 0;
+    if (forceFull) return taal.matras;
+
     const section = this.sections[sectionIdx];
     const avartan = section && section.avartans ? section.avartans[avartanIdx] : null;
     if (!taal || !section || !avartan) return 0;

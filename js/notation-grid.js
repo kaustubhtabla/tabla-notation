@@ -134,6 +134,9 @@ class NotationGrid {
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 1L2.5 9h4.5v6l7-8h-5V1z"/></svg> Generate
               </button>
             </div>
+            <button class="btn-icon btn-action btn-copy-section" data-section="${sIdx}" title="Copy Section Text">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            </button>
             <button class="btn-icon btn-action-danger btn-remove-section" data-section="${sIdx}" ${this.composition.sections.length <= 1 ? 'disabled' : ''} title="Remove Section">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </button>
@@ -182,7 +185,7 @@ class NotationGrid {
     }
 
     section.avartans.forEach((avartan, aIdx) => {
-      const renderedMatraCount = this.composition.getRenderedMatraCount(sIdx, aIdx) || taal.matras;
+      const renderedMatraCount = this.composition.getRenderedMatraCount(sIdx, aIdx, true) || taal.matras;
       const chunks = allChunks
         .map(chunk => ({
           start: chunk.start,
@@ -203,6 +206,10 @@ class NotationGrid {
             <button class="btn-avartan-action btn-clear-avartan" data-section="${sIdx}" data-avartan="${aIdx}" title="Clear all bols">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.5 4V2.5h5V4M6.5 7v4M9.5 7v4M3.5 4l.7 9.3a1.5 1.5 0 001.5 1.2h4.6a1.5 1.5 0 001.5-1.2l.7-9.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Clear</span>
+            </button>
+            <button class="btn-avartan-action btn-copy-avartan" data-section="${sIdx}" data-avartan="${aIdx}" title="Copy avartan text">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              <span>Copy</span>
             </button>
             <button class="btn-avartan-action btn-avartan-action--danger btn-remove-avartan" data-section="${sIdx}" data-avartan="${aIdx}" ${this.composition.sections[sIdx].avartans.length <= 1 ? 'disabled' : ''} title="Remove this avartan">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -246,10 +253,10 @@ class NotationGrid {
         for (let i = 0; i < numCols; i++) {
           const matraNum = chunk.start + i;
           const isOffRange = matraNum >= chunk.end;
+          const vibClass = isVibhaagStart(taal, matraNum) && i !== 0 ? ' vibhaag-start' : '';
           
           if (isOffRange) {
-            const vibClass = isVibhaagStart(taal, matraNum) && i !== 0 ? ' vibhaag-start' : '';
-            html += `<td class="matra-cell empty${vibClass}"></td>`;
+            html += `<td class="matra-cell empty${vibClass}" data-section="${sIdx}" data-avartan="${aIdx}" data-matra="${matraNum}" id="cell-${sIdx}-${aIdx}-${matraNum}"></td>`;
             continue;
           }
 
@@ -452,6 +459,71 @@ class NotationGrid {
         });
       });
     }
+
+    this.container.querySelectorAll('.btn-copy-section').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const sIdx = parseInt(btn.dataset.section);
+        const text = this._getSectionText(sIdx);
+        this._copyToClipboard(text, btn);
+      });
+    });
+
+    this.container.querySelectorAll('.btn-copy-avartan').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const sIdx = parseInt(btn.dataset.section);
+        const aIdx = parseInt(btn.dataset.avartan);
+        const text = this._getAvartanText(sIdx, aIdx);
+        this._copyToClipboard(text, btn);
+      });
+    });
+  }
+
+  _getAvartanText(sIdx, aIdx) {
+    const section = this.composition.sections[sIdx];
+    if (!section) return '';
+    const avartan = section.avartans[aIdx];
+    if (!avartan) return '';
+    const taal = this.composition.getTaal();
+    
+    let textChunks = [];
+    for (let i = 0; i < taal.matras; i++) {
+      const matra = avartan.matras[i];
+      let bolText = '';
+      if (matra && matra.bols && matra.bols.length > 0) {
+         bolText = matra.bols.map(b => getBolDisplay(b, this.currentScript)).join(' ');
+         if (matra.bols.length > 1) bolText = `[${bolText}]`;
+      } else {
+         bolText = '-';
+      }
+      
+      textChunks.push(bolText);
+      if (isVibhaagStart(taal, i + 1)) {
+        textChunks.push('|');
+      }
+    }
+    return textChunks.join(' ').replace(/ \|\s*$/, '');
+  }
+
+  _getSectionText(sIdx) {
+    const section = this.composition.sections[sIdx];
+    if (!section) return '';
+    let texts = [];
+    for (let aIdx = 0; aIdx < section.avartans.length; aIdx++) {
+      texts.push(this._getAvartanText(sIdx, aIdx));
+    }
+    return texts.join('\n');
+  }
+
+  _copyToClipboard(text, btnEl) {
+    navigator.clipboard.writeText(text).then(() => {
+      const originalHtml = btnEl.innerHTML;
+      btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      setTimeout(() => {
+        btnEl.innerHTML = originalHtml;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
   }
 
   _activateCell(sIdx, aIdx, mIdx, cellEl) {
